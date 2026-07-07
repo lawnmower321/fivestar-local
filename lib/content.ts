@@ -45,14 +45,17 @@ export const content = {
   ],
   showcase: {
     title: "One card. Every review.",
-    body: "A premium NFC card that lives at your counter. No batteries, no app, no fuss — just tap.",
-    bullets: [
-      "Premium matte finish with your branding",
-      "NFC chip + QR fallback on the back",
-      "No batteries, no charging, no maintenance",
-      "Re-linkable if your Google profile changes",
-    ],
+    body: "Watch what happens the moment a customer taps a FiveStar card — their phone opens the business's Google review page, ready for five stars.",
   },
+  // PLACEHOLDER businesses shown sliding through the scanner (match testimonials)
+  scanItems: [
+    { name: "Bella's Bakery", type: "Bakery", rating: "4.9", reviews: 212 },
+    { name: "T&J Auto Repair", type: "Auto Shop", rating: "4.8", reviews: 340 },
+    { name: "Lotus Nail Studio", type: "Nail Salon", rating: "4.9", reviews: 187 },
+    { name: "Riverside Barbershop", type: "Barbershop", rating: "5.0", reviews: 156 },
+    { name: "Fresh Coat Painting", type: "Painting Contractor", rating: "4.8", reviews: 98 },
+    { name: "Cedar Grill", type: "Restaurant", rating: "4.7", reviews: 421 },
+  ],
   // PLACEHOLDER testimonials — replace with real customer quotes
   testimonials: [
     { name: "Maria G.", business: "Bella's Bakery", quote: "We went from 40 reviews to over 200 in three months. Customers actually enjoy tapping the card." },
