@@ -5,6 +5,9 @@ import { HowItWorks } from "@/components/site/how-it-works";
 import { Benefits } from "@/components/site/benefits";
 import { Showcase } from "@/components/site/showcase";
 import { Testimonials } from "@/components/site/testimonials";
+import { Stats } from "@/components/site/stats";
+import { Faq } from "@/components/site/faq";
+import { FinalCta } from "@/components/site/final-cta";
 
 export default function Home() {
   return (
@@ -16,6 +19,9 @@ export default function Home() {
         <Benefits />
         <Showcase />
         <Testimonials />
+        <Stats />
+        <Faq />
+        <FinalCta />
       </main>
       <Footer />
     </div>
