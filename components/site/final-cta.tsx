@@ -14,6 +14,7 @@ export function FinalCta() {
         <p className="mt-4 text-lg text-slate-300">{content.finalCta.body}</p>
         <Button
           render={<a href={`mailto:${content.site.email}`} />}
+          nativeButton={false}
           size="lg"
           className="mt-8 bg-gblue text-white hover:bg-gblue/90"
         >

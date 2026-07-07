@@ -29,6 +29,7 @@ export function Navbar() {
           ))}
           <Button
             render={<a href={`mailto:${content.site.email}`} />}
+            nativeButton={false}
             className="bg-gblue text-white hover:bg-gblue/90"
           >
             Get Started
@@ -56,6 +57,7 @@ export function Navbar() {
           ))}
           <Button
             render={<a href={`mailto:${content.site.email}`} />}
+            nativeButton={false}
             className="mt-2 w-full bg-gblue text-white hover:bg-gblue/90"
           >
             Get Started

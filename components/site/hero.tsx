@@ -40,12 +40,13 @@ export function Hero() {
           <motion.div {...fade(0.3)} className="mt-8 flex flex-wrap gap-4">
             <Button
               render={<a href={`mailto:${content.site.email}`} />}
+              nativeButton={false}
               size="lg"
               className="bg-gblue text-white hover:bg-gblue/90"
             >
               {content.hero.cta}
             </Button>
-            <Button render={<a href="#how-it-works" />} size="lg" variant="outline">
+            <Button render={<a href="#how-it-works" />} nativeButton={false} size="lg" variant="outline">
               {content.hero.ctaSecondary}
             </Button>
           </motion.div>
