@@ -11,7 +11,7 @@ export function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-md">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="#" className="flex items-center gap-2 font-bold text-slate-900">
+        <Link href="#" className="flex items-center gap-2 font-heading font-bold text-slate-900">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gblue">
             <Star size={18} className="fill-gyellow text-gyellow" />
           </span>
@@ -28,11 +28,11 @@ export function Navbar() {
             </Link>
           ))}
           <Button
-            render={<a href={`mailto:${content.site.email}`} />}
+            render={<a href="#pricing" />}
             nativeButton={false}
             className="bg-gblue text-white hover:bg-gblue/90"
           >
-            Get Started
+            See pricing
           </Button>
         </div>
         <button
@@ -56,11 +56,11 @@ export function Navbar() {
             </Link>
           ))}
           <Button
-            render={<a href={`mailto:${content.site.email}`} />}
+            render={<a href="#pricing" />}
             nativeButton={false}
             className="mt-2 w-full bg-gblue text-white hover:bg-gblue/90"
           >
-            Get Started
+            See pricing
           </Button>
         </div>
       )}

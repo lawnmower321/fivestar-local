@@ -1,53 +1,51 @@
-// PLACEHOLDER CONTENT — replace with real data before going live.
 // Every string on the site lives here so you only edit this one file.
+//
+// TODO before pushing traffic:
+// 1. Set up email forwarding for hello@fivestarlocal.pro (free via your
+//    registrar or improvmx.com) so the mailto CTAs actually reach you.
+// 2. When your Stripe payment links exist, paste them into pricing.tiers[].href
+//    below (they currently fall back to mailto).
+// 3. After the first real install, add the case study numbers to `proof`.
 
 export const content = {
   site: {
     name: "FiveStar Local",
-    email: "hello@fivestarlocal.com", // PLACEHOLDER — replace with real email
+    email: "hello@fivestarlocal.pro",
   },
   nav: [
-    { label: "How It Works", href: "#how-it-works" },
-    { label: "Benefits", href: "#benefits" },
-    { label: "Reviews", href: "#reviews" },
+    { label: "How it works", href: "#how-it-works" },
+    { label: "What you get", href: "#what-you-get" },
+    { label: "Pricing", href: "#pricing" },
     { label: "FAQ", href: "#faq" },
   ],
   hero: {
-    badge: "Trusted by local businesses",
+    eyebrow: "NFC review cards · installed in person",
     headline: "Turn happy customers into 5-star Google reviews",
     highlight: "with one tap",
     subhead:
-      "FiveStar Local NFC cards make leaving a review effortless. Your customer taps the card, their phone opens your Google review page, and your rating climbs.",
-    cta: "Get Started",
+      "A small card on your counter. Your customer taps it with their phone, your Google review page opens, and the review happens before they're out the door. We come to you and set the whole thing up while you watch.",
+    cta: "See pricing",
     ctaSecondary: "See how it works",
   },
   steps: [
     {
       title: "Tap the card",
-      body: "Hand your customer the FiveStar card. One tap with any modern phone — no app, no QR hunting.",
+      body: "Your customer taps the card at checkout. Works with the NFC reader built into every modern phone — no app, no QR hunting.",
     },
     {
       title: "Leave a review",
-      body: "Their phone opens your Google review page instantly. Five stars takes about fifteen seconds.",
+      body: "Their phone opens your Google review page directly. Five stars takes about fifteen seconds.",
     },
     {
       title: "Climb the rankings",
-      body: "More fresh reviews means better local search visibility — and more customers walking in.",
+      body: "Review count and recency are two of Google's strongest local ranking signals. More reviews, higher on the map, more walk-ins.",
     },
-  ],
-  benefits: [
-    { title: "More reviews, faster", body: "Businesses using tap cards collect reviews dramatically faster than asking alone." },
-    { title: "Better local SEO", body: "Review volume and recency are key local ranking signals on Google." },
-    { title: "No app required", body: "Works with the NFC reader built into every modern iPhone and Android." },
-    { title: "Works on any phone", body: "QR code on the back covers older phones, so nobody is left out." },
-    { title: "Unlimited taps", body: "One card, unlimited reviews. No subscriptions, no per-tap fees." },
-    { title: "Set up in minutes", body: "We link your card to your Google Business Profile before it ships." },
   ],
   showcase: {
     title: "One card. Every review.",
-    body: "Watch what happens the moment a customer taps a FiveStar card — their phone opens the business's Google review page, ready for five stars.",
+    body: "The moment a customer taps a FiveStar card, their phone opens that business's Google review page — ready for five stars.",
   },
-  // PLACEHOLDER businesses shown sliding through the scanner (match testimonials)
+  // Example businesses shown sliding through the scanner (illustration only)
   scanItems: [
     { name: "Bella's Bakery", type: "Bakery", rating: "4.9", reviews: 212 },
     { name: "T&J Auto Repair", type: "Auto Shop", rating: "4.8", reviews: 340 },
@@ -56,33 +54,95 @@ export const content = {
     { name: "Fresh Coat Painting", type: "Painting Contractor", rating: "4.8", reviews: 98 },
     { name: "Cedar Grill", type: "Restaurant", rating: "4.7", reviews: 421 },
   ],
-  // PLACEHOLDER testimonials — replace with real customer quotes
-  testimonials: [
-    { name: "Maria G.", business: "Bella's Bakery", quote: "We went from 40 reviews to over 200 in three months. Customers actually enjoy tapping the card." },
-    { name: "James T.", business: "T&J Auto Repair", quote: "Simplest marketing money I've ever spent. We show up first on Google Maps in our area now." },
-    { name: "Priya S.", business: "Lotus Nail Studio", quote: "My clients tap it at checkout without me even asking. Reviews just happen now." },
-    { name: "Dan R.", business: "Riverside Barbershop", quote: "Setup took five minutes. The card looks great on the counter and it just works." },
-    { name: "Kelly M.", business: "Fresh Coat Painting", quote: "We close more jobs because people see 5 stars before they even call us." },
-    { name: "Omar H.", business: "Cedar Grill", quote: "Our rating went from 4.1 to 4.7. That half star changed our weekends completely." },
-  ],
-  // PLACEHOLDER stats — replace with real numbers
-  // isRating: true renders value/10 as "4.9 ★" instead of a plain count
-  stats: [
-    { value: 2000, suffix: "+", label: "Businesses served", isRating: false },
-    { value: 500000, suffix: "+", label: "Reviews collected", isRating: false },
-    { value: 49, suffix: "", label: "Average rating", isRating: true },
-  ],
+  whatYouGet: {
+    title: "Everything is set up before we leave",
+    body: "This isn't a gadget in the mail with an instruction sheet. We program your cards to your exact Google review link, place them, and test them on a real phone in front of you.",
+    items: [
+      "NFC cards + a counter stand, programmed to your Google review link",
+      "In-person setup — tested and working before we walk out",
+      "QR code fallback printed on the stand for older phones",
+      "Nothing for customers to install, nothing to charge, nothing to maintain",
+      "Review replies written for you within 48 hours (Growth plan)",
+      "A monthly report: new reviews, rating trend, where you rank (Growth plan)",
+    ],
+  },
+  pricing: {
+    title: "Two ways to start",
+    body: "No contracts on either. If you're not getting reviews, you can walk away and keep the cards.",
+    // href: swap the mailto for your Stripe payment link when it exists
+    tiers: [
+      {
+        name: "Starter",
+        price: "$99",
+        cadence: "one-time",
+        blurb: "The hardware, installed. Yours forever.",
+        features: [
+          "2 NFC cards + counter stand",
+          "Programmed to your review link",
+          "In-person setup and staff walkthrough",
+          "QR fallback for older phones",
+          "No monthly anything, ever",
+        ],
+        cta: "Get Starter",
+        href: null,
+        featured: false,
+      },
+      {
+        name: "Growth",
+        price: "$29",
+        cadence: "/month + $49 setup",
+        blurb: "Cards included free — plus we manage your reviews for you.",
+        features: [
+          "Everything in Starter — cards free",
+          "We reply to every Google review in your voice, within 48 hours",
+          "An active, answered profile is a ranking signal on its own",
+          "Monthly review report with your numbers",
+          "Cancel anytime, keep the cards",
+        ],
+        cta: "Get Growth",
+        href: null,
+        featured: true,
+      },
+    ],
+    finePrint: "Setup happens at your business — we come to you.",
+  },
+  team: {
+    title: "Run by two people you'll actually meet",
+    body: "FiveStar Local is a two-person local operation. We program every card ourselves, walk it into your business, and answer our own email. If something breaks, you talk to the people who set it up — not a ticket queue.",
+  },
   faqs: [
-    { q: "Do my customers need an app?", a: "No. Tapping the card uses the NFC reader built into every modern smartphone. Older phones can scan the QR code on the back instead." },
-    { q: "Is this allowed by Google?", a: "Yes. The card simply makes it easier for customers to reach your public review page — the same link Google gives every business. You should never offer incentives for reviews, and we'll guide you on best practices." },
-    { q: "How long does setup take?", a: "Minutes. Tell us your business name, we link the card to your Google Business Profile, and it arrives ready to tap." },
-    { q: "What if I move or rebrand?", a: "Cards are re-linkable. If your Google profile changes, we update your card's destination for free." },
-    { q: "Does the card need charging?", a: "Never. NFC chips are passive — no battery, no charging, no maintenance. It works for years." },
-    { q: "What does it cost?", a: "One flat price per card, no subscriptions and no per-tap fees. Contact us for current pricing and volume discounts." },
+    {
+      q: "Do my customers need an app?",
+      a: "No. Tapping the card uses the NFC reader built into every modern smartphone. Older phones can scan the QR code on the stand instead.",
+    },
+    {
+      q: "Is this allowed by Google?",
+      a: "Yes. The card opens your public review page — the same link Google gives every business. What Google prohibits is paying for reviews or only asking happy customers. We set you up to do it right: the card is there for everyone.",
+    },
+    {
+      q: "What does it cost?",
+      a: "Starter is $99 one-time for the cards, stand, and in-person setup. Growth is a $49 setup plus $29/month, which gets you the hardware free and we handle responding to your reviews. No contracts on either.",
+    },
+    {
+      q: "Who writes the review replies on the Growth plan?",
+      a: "We do — in your business's voice, within 48 hours of a review landing. You approve the tone once at setup and can change it anytime.",
+    },
+    {
+      q: "How long does setup take?",
+      a: "About 15 minutes. We program the cards to your Google Business Profile on the spot, place the stand, and test it on a real phone before we leave.",
+    },
+    {
+      q: "What if I move or rebrand?",
+      a: "Cards are re-linkable. If your Google profile changes, we update your card's destination for free.",
+    },
+    {
+      q: "Does the card need charging?",
+      a: "Never. NFC chips are passive — no battery, no charging, no maintenance. The same card works for years.",
+    },
   ],
   finalCta: {
-    title: "Ready to look like the obvious choice?",
-    body: "Join local businesses turning everyday customers into a five-star reputation.",
-    cta: "Get Started",
+    title: "Want this on your counter this week?",
+    body: "Email us your business name. We'll find you on Google, program a card to your review page, and bring it to you.",
+    cta: "Email us",
   },
 } as const;

@@ -3,8 +3,35 @@
 import { Button } from "@/components/ui/button";
 import { content } from "@/lib/content";
 import { NfcCard } from "@/components/site/nfc-card";
-import { Stars } from "@/components/site/stars";
 import { motion, useReducedMotion } from "motion/react";
+
+/** Concentric NFC ripple field — the tap gesture, drawn as thin rings */
+function RippleField() {
+  return (
+    <svg
+      className="pointer-events-none absolute left-1/2 top-1/2 h-[720px] w-[720px] -translate-x-1/2 -translate-y-1/2 text-slate-200"
+      viewBox="0 0 720 720"
+      fill="none"
+      aria-hidden
+    >
+      {[120, 190, 260, 330].map((r) => (
+        <circle key={r} cx="360" cy="360" r={r} stroke="currentColor" strokeWidth="1" />
+      ))}
+      {/* one blue arc — the tap, mid-broadcast */}
+      <circle
+        className="ring-pulse"
+        cx="360"
+        cy="360"
+        r={225}
+        stroke="#4285f4"
+        strokeWidth="1.5"
+        strokeDasharray="140 1274"
+        strokeDashoffset="-160"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 
 export function Hero() {
   const reduce = useReducedMotion();
@@ -15,31 +42,28 @@ export function Hero() {
   });
 
   return (
-    <section className="relative overflow-hidden bg-slate-50 pb-20 pt-32 sm:pt-40">
-      {/* 4-color gradient glow */}
-      <div className="glow-blob animate-blob left-[-10%] top-[-10%] h-72 w-72 bg-gblue" />
-      <div className="glow-blob animate-blob right-[-5%] top-[10%] h-64 w-64 bg-gred" style={{ animationDelay: "-4s" }} />
-      <div className="glow-blob animate-blob bottom-[-15%] left-[20%] h-64 w-64 bg-gyellow" style={{ animationDelay: "-8s" }} />
-      <div className="glow-blob animate-blob bottom-[-10%] right-[25%] h-56 w-56 bg-ggreen" style={{ animationDelay: "-11s" }} />
-
-      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2">
+    <section className="relative overflow-hidden bg-white pb-24 pt-32 sm:pt-40">
+      <div className="relative mx-auto grid max-w-6xl items-center gap-16 px-4 sm:px-6 lg:grid-cols-2">
         <div>
-          <motion.div {...fade(0)} className="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-600 shadow-sm">
-            <Stars size={14} />
-            {content.hero.badge}
-          </motion.div>
-          <motion.h1 {...fade(0.1)} className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+          <motion.p
+            {...fade(0)}
+            className="font-mono text-xs uppercase tracking-[0.2em] text-slate-500"
+          >
+            {content.hero.eyebrow}
+          </motion.p>
+          <motion.h1
+            {...fade(0.1)}
+            className="mt-5 font-heading text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-[3.4rem] lg:leading-[1.05]"
+          >
             {content.hero.headline}{" "}
-            <span className="bg-gradient-to-r from-gblue via-ggreen to-gblue bg-clip-text text-transparent">
-              {content.hero.highlight}
-            </span>
+            <span className="text-gblue">{content.hero.highlight}</span>
           </motion.h1>
-          <motion.p {...fade(0.2)} className="mt-6 max-w-xl text-lg text-slate-600">
+          <motion.p {...fade(0.2)} className="mt-6 max-w-xl text-lg leading-relaxed text-slate-600">
             {content.hero.subhead}
           </motion.p>
-          <motion.div {...fade(0.3)} className="mt-8 flex flex-wrap gap-4">
+          <motion.div {...fade(0.3)} className="mt-9 flex flex-wrap gap-4">
             <Button
-              render={<a href={`mailto:${content.site.email}`} />}
+              render={<a href="#pricing" />}
               nativeButton={false}
               size="lg"
               className="bg-gblue text-white hover:bg-gblue/90"
@@ -51,7 +75,10 @@ export function Hero() {
             </Button>
           </motion.div>
         </div>
-        <NfcCard />
+        <div className="relative">
+          <RippleField />
+          <NfcCard />
+        </div>
       </div>
     </section>
   );
