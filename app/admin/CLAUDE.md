@@ -8,6 +8,11 @@ INVARIANTS
   a valid rd_session cookie (sha256 of REPLYDESK_PASSCODE).
 - Server actions in actions.ts: construct real clients (getDb, getAnthropic),
   call lib/replydesk functions, revalidatePath. They contain NO logic.
+- Server actions SELF-AUTHENTICATE: the (protected) layout guards page render
+  only, not action POST endpoints, and there is no middleware. Every action in
+  actions.ts calls `await requireSession()` (require-session.ts) as its first
+  statement; the login action is exempt. require-session.ts reads cookies() so
+  it lives here in the shell, never in lib/replydesk (no next/* there).
 - Secrets are read only inside server code. Nothing here is public marketing
   UI — but keep the same Tailwind design language as the site.
 

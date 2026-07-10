@@ -13,13 +13,17 @@ export default async function BusinessPage({
   const { id } = await params;
   const db = getDb();
   const business = await getBusiness(db, id);
-  const reviews = await listReviews(db, id, 25);
+  // Show only POSTED rows in the Recent-reviews log. Every generate inserts a
+  // `draft` audit row; those live only in the transient workspace card, so
+  // filtering here keeps regenerations from cluttering the log. The DB insert
+  // stays as the audit trail. (See docs/replydesk/DECISIONS.md.)
+  const reviews = (await listReviews(db, id, 50)).filter((r) => r.status === "posted");
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="font-heading text-2xl font-bold text-slate-900">{business.name}</h1>
-        {business.reviewUrl && (
+        {business.reviewUrl && /^https?:\/\//.test(business.reviewUrl) && (
           <a href={business.reviewUrl} target="_blank" rel="noopener noreferrer"
             className="text-sm text-gblue hover:underline">
             Google review page ↗

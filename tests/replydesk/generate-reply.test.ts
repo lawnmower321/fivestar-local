@@ -66,12 +66,32 @@ describe("generateReply", () => {
     expect(out.gate.hardFail).toBe(false);
   });
 
-  it("hard-fails without retrying burn when contact info persists", async () => {
+  it("exhausts all 3 attempts on a persistent hard-fail (retrying is intentional)", async () => {
+    // Hard-fails (contact info) are retried the full MAX_ATTEMPTS on purpose:
+    // a regeneration is another shot at a postable reply, and the cost is a few
+    // cents only in the rare hard-fail case. See docs/replydesk/DECISIONS.md.
     const { client } = fakeClient([
       { reply: "Email tony@pizza.com and we'll fix it", detail_referenced: "issue" },
     ]);
     const out = await generateReply(client, input);
+    expect(out.attempts).toBe(3);
     expect(out.gate.hardFail).toBe(true);
     expect(out.gate.ok).toBe(false);
+  });
+
+  it("does not throw on malformed (non-JSON) model output and returns a flagged result", async () => {
+    // Fake client that returns plain text instead of the expected JSON schema.
+    const client = {
+      messages: {
+        create: async () => ({
+          stop_reason: "end_turn",
+          content: [{ type: "text", text: "Sorry, I can't help with that." }],
+        }),
+      },
+    } as unknown as Anthropic;
+    const out = await generateReply(client, input);
+    expect(out.gate.ok).toBe(false);
+    expect(out.attempts).toBe(3);
+    expect(out.gate.reasons).toContain("model returned malformed output");
   });
 });

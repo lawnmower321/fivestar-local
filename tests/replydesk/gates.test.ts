@@ -13,16 +13,39 @@ describe("contact-info gate", () => {
     expect(findContactInfo("Call 555-123-4567")).toContain("phone");
     expect(findContactInfo("Call 5551234567 today")).toContain("phone");
   });
+  it("flags international phone groupings", () => {
+    expect(findContactInfo("Ring us on +44 20 7946 0958 anytime")).toContain("phone");
+    expect(findContactInfo("Reservations: +33 1 70 18 99 00")).toContain("phone");
+  });
   it("flags URLs", () => {
     expect(findContactInfo("See www.tonyspizza.com for deals")).toContain("URL");
     expect(findContactInfo("Visit https://tonyspizza.com")).toContain("URL");
   });
+  it("flags bare domains outside the common gTLDs", () => {
+    expect(findContactInfo("Order online at tonyspizza.shop today")).toContain("URL");
+    expect(findContactInfo("Book at salon.app for a slot")).toContain("URL");
+    expect(findContactInfo("Full menu at shop.co.uk anytime")).toContain("URL");
+    expect(findContactInfo("Grab a table via menu.us tonight")).toContain("URL");
+  });
   it("flags contact phrases", () => {
     expect(findContactInfo("Please contact us at the shop")).toContain("contact phrase");
+  });
+  it("flags off-platform contact phrases", () => {
+    expect(findContactInfo("DM us for the details")).toContain("contact phrase");
+    expect(findContactInfo("Just message us and we'll sort it")).toContain("contact phrase");
+    expect(findContactInfo("You can find us online too")).toContain("contact phrase");
+    expect(findContactInfo("Check our site for hours")).toContain("contact phrase");
+    expect(findContactInfo("More photos on our website")).toContain("contact phrase");
   });
   it("passes clean replies mentioning numbers that are not phones", () => {
     expect(findContactInfo("Thanks for visiting us on May 5, 2026 — the garlic knots are a team favorite!")).toBeNull();
     expect(findContactInfo("Glad the party of 12 had a great time!")).toBeNull();
+  });
+  it("does not flag ordinary sentence punctuation", () => {
+    // A normal period-then-space between sentences must NOT read as a domain.
+    expect(findContactInfo("The pizza was great. Our whole table agreed and we'll be back soon.")).toBeNull();
+    // Abbreviations with single-letter segments must not trip the domain regex.
+    expect(findContactInfo("We're open till 9 p.m. daily — thanks for stopping by!")).toBeNull();
   });
 });
 

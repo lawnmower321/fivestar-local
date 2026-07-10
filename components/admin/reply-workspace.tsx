@@ -30,9 +30,19 @@ export function ReplyWorkspace({ business, reviews }: { business: Business; revi
 
   const copyAndMark = (d: Draft) =>
     start(async () => {
-      await navigator.clipboard.writeText(d.reply);
-      setCopied(true);
-      await markPostedAction(d.reviewId, business.id);
+      setError(null);
+      try {
+        await navigator.clipboard.writeText(d.reply);
+        await markPostedAction(d.reviewId, business.id);
+        // Only confirm once both the copy and the mark-posted have succeeded.
+        setCopied(true);
+      } catch (e) {
+        setError(
+          e instanceof Error
+            ? `Couldn't copy or mark posted: ${e.message} — the draft is kept, try again.`
+            : "Couldn't copy or mark posted — the draft is kept, try again.",
+        );
+      }
     });
 
   return (

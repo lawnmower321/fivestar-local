@@ -23,6 +23,46 @@ example), not a magic header available to Server Components. Relying on it
 risked either failing open (guard never triggers) or a redirect loop (guard
 always triggers, including on `/admin/login` itself).
 
+## 2026-07-10 — Server actions self-authenticate via requireSession()
+The (protected) route-group layout only guards PAGE rendering; server-action
+POST endpoints are reachable without it and there is no middleware. So every
+action in `app/admin/actions.ts` now calls `await requireSession()` as its
+first statement (new `app/admin/require-session.ts`, which reads `cookies()`
+and calls `isValidSession`). That file lives in the app shell, not
+`lib/replydesk/`, to preserve the "no `next/*` in lib" invariant. The login
+action stays exempt.
+
+## 2026-07-10 — Contact-info gate broadened (bare domains, intl phones, phrases)
+The HARD contact-info gate was NA/English-centric. Broadened: (a) bare-domain
+detection now matches ANY 2+ letter TLD (incl. multi-part like co.uk), not just
+.com/.net/.org/.io/.co, so tonyspizza.shop / salon.app / shop.co.uk / menu.us
+are caught; the TLD letters must sit immediately after the dot so ordinary
+sentence punctuation ("great. Our…", "9 p.m.") is not flagged. (b) A separate
+international-phone pattern catches "+country groups" like +44 20 7946 0958 (the
+literal + avoids date/count false positives). (c) Contact phrases added: DM us,
+message us, find us online, our site, our website. This is an un-bypassable
+moderation gate, so it errs slightly toward over-blocking by design. Existing
+clean fixtures still return null (verified in tests/replydesk/gates.test.ts).
+
+## 2026-07-10 — Recent-reviews log shows posted-only; drafts stay transient
+Every generate inserts a `draft` review row (audit trail), so regenerating used
+to clutter the "Recent reviews" list. Chosen fix: the detail page filters the
+displayed log to `status === 'posted'`; drafts live only in the transient
+workspace card. The DB insert is kept as the audit trail, and the similarity
+gate already reads posted-only via `recentPostedReplies`, so nothing regresses.
+
+## 2026-07-10 — Hard-fails intentionally retry the full 3 attempts
+The generate loop retries on ANY gate failure, including hard-fails
+(contact-info). This is intentional: a regeneration is another chance at a
+postable reply and costs a few cents only in the rare hard-fail case. Behavior
+unchanged; the mis-named test was renamed and now asserts `attempts === 3`.
+
+## 2026-07-10 — Malformed model output is a failed attempt, not a fatal error
+`generateReply` now wraps `JSON.parse` per attempt: a non-JSON response records
+a flagged result ("model returned malformed output") and continues the loop, so
+after MAX_ATTEMPTS it returns a flagged GeneratedReply for human review instead
+of throwing and killing the retry loop.
+
 Instead: `login/` lives directly under `app/admin/` with no guard, and every
 other admin route lives under the route group `app/admin/(protected)/`,
 whose `layout.tsx` unconditionally redirects to `/admin/login` when

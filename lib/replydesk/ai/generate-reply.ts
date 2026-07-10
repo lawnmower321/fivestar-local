@@ -44,10 +44,27 @@ export async function generateReply(
       ],
     });
 
-    const parsed = JSON.parse(textOf(response)) as {
-      reply: string;
-      detail_referenced: string;
-    };
+    const raw = textOf(response);
+    let parsed: { reply: string; detail_referenced: string } | null = null;
+    try {
+      parsed = JSON.parse(raw) as { reply: string; detail_referenced: string };
+    } catch {
+      // A non-JSON attempt is a FAILED attempt, not a fatal error: record a
+      // flagged result and let the loop try again. After MAX_ATTEMPTS this
+      // returns a flagged GeneratedReply for human review instead of throwing.
+      last = {
+        reply: raw,
+        detailReferenced: "",
+        gate: {
+          ok: false,
+          hardFail: false,
+          reasons: ["model returned malformed output"],
+          similarity: 0,
+        },
+        attempts: attempt,
+      };
+      continue;
+    }
     const gate = runGates(parsed.reply, {
       rating: input.rating,
       recentReplies: input.recentReplies,
