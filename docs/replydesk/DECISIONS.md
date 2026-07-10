@@ -37,3 +37,9 @@ Per the route-group guard above, the business list page (brief's literal
 so the auth guard actually protects it. Server actions stayed at
 `app/admin/actions.ts` (route groups don't change import paths), so
 `@/app/admin/actions` still resolves for this page and for Tasks 7–8.
+
+## 2026-07-10 — Task 7 business detail page placed under `(protected)/`
+Same reasoning as Task 6: the brief's literal `app/admin/businesses/[id]/page.tsx`
+was created at `app/admin/(protected)/businesses/[id]/page.tsx` so the guard
+protects it. Route groups add no URL segment, so `/admin/businesses/{id}`
+still resolves correctly for links from the list page and `createBusinessAction`.
