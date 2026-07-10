@@ -43,3 +43,13 @@ Same reasoning as Task 6: the brief's literal `app/admin/businesses/[id]/page.ts
 was created at `app/admin/(protected)/businesses/[id]/page.tsx` so the guard
 protects it. Route groups add no URL segment, so `/admin/businesses/{id}`
 still resolves correctly for links from the list page and `createBusinessAction`.
+
+## 2026-07-10 — Task 9 context-integrity pass: one stale path fixed, no code changes
+Full check suite passed as-is (26/26 tests, lint clean, build compiles with
+`/admin`, `/admin/login`, `/admin/businesses/[id]` present) — no regressions,
+so no code changes were made. Re-reading every module `CLAUDE.md` against its
+folder found exactly one drift: `lib/replydesk/ai/prompts/CLAUDE.md` said the
+gates live at `../gates/`, but from `lib/replydesk/ai/prompts/` the correct
+relative path is `../../gates/` (prompts → ai → replydesk → gates). Fixed the
+doc; no other `CLAUDE.md` (`lib/replydesk/`, `gates/`, `ai/`, `app/admin/`,
+`components/admin/`) had a false statement against the shipped code.
