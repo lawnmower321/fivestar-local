@@ -30,3 +30,10 @@ whose `layout.tsx` unconditionally redirects to `/admin/login` when
 `/admin/businesses/[id]` are unaffected, but only routes inside the group are
 ever subject to the guard — no path string matching required, and no way for
 the check to silently no-op.
+
+## 2026-07-10 — Task 6 business list page placed under `(protected)/`
+Per the route-group guard above, the business list page (brief's literal
+`app/admin/page.tsx`) was created at `app/admin/(protected)/page.tsx` instead,
+so the auth guard actually protects it. Server actions stayed at
+`app/admin/actions.ts` (route groups don't change import paths), so
+`@/app/admin/actions` still resolves for this page and for Tasks 7–8.
