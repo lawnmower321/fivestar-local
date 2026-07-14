@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getDb, createBusiness, getBusiness, updateBusiness, insertReview, markPosted, recentPostedReplies } from "@/lib/replydesk/db";
+import { getDb, createBusiness, getBusiness, updateBusiness, insertReview, markPosted, recentPostedReplies, deleteBusiness } from "@/lib/replydesk/db";
 import { getOpenRouter } from "@/lib/replydesk/ai/client";
 import { generateReply } from "@/lib/replydesk/ai/generate-reply";
 import { buildKnowledgebase } from "@/lib/replydesk/ai/build-knowledgebase";
@@ -97,4 +97,14 @@ export async function markPostedAction(reviewId: string, businessId: string): Pr
   await requireSession();
   await markPosted(getDb(), reviewId);
   revalidatePath(`/admin/businesses/${businessId}`);
+}
+
+export async function deleteBusinessAction(businessId: string): Promise<{ error: string } | void> {
+  await requireSession();
+  try {
+    await deleteBusiness(getDb(), businessId);
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Delete failed — try again." };
+  }
+  redirect("/admin");
 }
