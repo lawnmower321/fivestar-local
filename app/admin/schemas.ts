@@ -8,13 +8,14 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
-const httpUrl = z.string().regex(/^https?:\/\//, "must start with http(s)://");
+const HTTP_URL_RE = /^https?:\/\//;
+const httpUrl = z.string().regex(HTTP_URL_RE, "must start with http(s)://");
 
 export const createBusinessSchema = z.object({
   name: z.string().trim().min(1),
   // Non-http(s) input degrades to null (never reaches an <a href>) — same
   // behavior as the pre-zod regex in createBusinessAction.
-  reviewUrl: z.string().trim().transform((s) => (/^https?:\/\//.test(s) ? s : null)),
+  reviewUrl: z.string().trim().transform((s) => (HTTP_URL_RE.test(s) ? s : null)),
 });
 
 export const saveKbSchema = z.object({ businessId: z.uuid(), kbMd: z.string() });

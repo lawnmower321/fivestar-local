@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   loginSchema, createBusinessSchema, generateReplySchema,
   markPostedSchema, buildKbFromUrlSchema, buildKbFromTextSchema,
+  saveKbSchema, saveVoiceSchema, extractVoiceSchema, deleteBusinessSchema,
 } from "@/app/admin/schemas";
 
 const UUID = "a2f7c1de-3b44-4e6f-9a10-8a2f1c3d4e5f";
@@ -44,6 +45,9 @@ describe("generateReplySchema", () => {
   it("rejects rating 0", () => {
     expect(generateReplySchema.safeParse({ ...base, rating: 0 }).success).toBe(false);
   });
+  it("rejects rating 6 (above the upper bound)", () => {
+    expect(generateReplySchema.safeParse({ ...base, rating: 6 }).success).toBe(false);
+  });
   it("rejects a fractional rating", () => {
     expect(generateReplySchema.safeParse({ ...base, rating: 4.5 }).success).toBe(false);
   });
@@ -53,13 +57,64 @@ describe("generateReplySchema", () => {
 });
 
 describe("id schemas", () => {
+  it("markPostedSchema accepts two valid uuids", () => {
+    expect(markPostedSchema.parse({ reviewId: UUID, businessId: UUID }))
+      .toEqual({ reviewId: UUID, businessId: UUID });
+  });
   it("markPostedSchema rejects a non-uuid", () => {
     expect(markPostedSchema.safeParse({ reviewId: "nope", businessId: UUID }).success).toBe(false);
+  });
+  it("buildKbFromUrlSchema accepts an https url", () => {
+    expect(buildKbFromUrlSchema.parse({ businessId: UUID, url: "https://example.com" }))
+      .toEqual({ businessId: UUID, url: "https://example.com" });
   });
   it("buildKbFromUrlSchema rejects a javascript: url", () => {
     expect(buildKbFromUrlSchema.safeParse({ businessId: UUID, url: "javascript:x" }).success).toBe(false);
   });
+  it("buildKbFromTextSchema accepts real text", () => {
+    expect(buildKbFromTextSchema.parse({ businessId: UUID, raw: "real text" }))
+      .toEqual({ businessId: UUID, raw: "real text" });
+  });
   it("buildKbFromTextSchema rejects whitespace-only text", () => {
     expect(buildKbFromTextSchema.safeParse({ businessId: UUID, raw: "   " }).success).toBe(false);
+  });
+});
+
+describe("saveKbSchema", () => {
+  it("accepts a valid businessId + kbMd", () => {
+    expect(saveKbSchema.parse({ businessId: UUID, kbMd: "## KB" }))
+      .toEqual({ businessId: UUID, kbMd: "## KB" });
+  });
+  it("rejects a non-uuid businessId", () => {
+    expect(saveKbSchema.safeParse({ businessId: "nope", kbMd: "## KB" }).success).toBe(false);
+  });
+});
+
+describe("saveVoiceSchema", () => {
+  it("accepts a valid businessId + voiceMd", () => {
+    expect(saveVoiceSchema.parse({ businessId: UUID, voiceMd: "## Voice" }))
+      .toEqual({ businessId: UUID, voiceMd: "## Voice" });
+  });
+  it("rejects a non-uuid businessId", () => {
+    expect(saveVoiceSchema.safeParse({ businessId: "nope", voiceMd: "## Voice" }).success).toBe(false);
+  });
+});
+
+describe("extractVoiceSchema", () => {
+  it("accepts a valid businessId + pastReplies", () => {
+    expect(extractVoiceSchema.parse({ businessId: UUID, pastReplies: "some text" }))
+      .toEqual({ businessId: UUID, pastReplies: "some text" });
+  });
+  it("rejects whitespace-only pastReplies", () => {
+    expect(extractVoiceSchema.safeParse({ businessId: UUID, pastReplies: "   " }).success).toBe(false);
+  });
+});
+
+describe("deleteBusinessSchema", () => {
+  it("accepts a valid businessId", () => {
+    expect(deleteBusinessSchema.parse({ businessId: UUID })).toEqual({ businessId: UUID });
+  });
+  it("rejects a non-uuid businessId", () => {
+    expect(deleteBusinessSchema.safeParse({ businessId: "nope" }).success).toBe(false);
   });
 });
