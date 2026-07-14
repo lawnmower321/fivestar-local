@@ -101,3 +101,15 @@ export async function markPosted(db: SupabaseClient, reviewId: string): Promise<
     .update({ status: "posted", posted_at: new Date().toISOString() }).eq("id", reviewId);
   if (error) throw new Error(error.message);
 }
+
+export async function deleteBusiness(db: SupabaseClient, id: string): Promise<void> {
+  const { error } = await db.from("businesses").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function countReviews(db: SupabaseClient, businessId: string): Promise<number> {
+  const { count, error } = await db.from("reviews")
+    .select("*", { count: "exact", head: true }).eq("business_id", businessId);
+  if (error) throw new Error(error.message);
+  return count ?? 0;
+}
