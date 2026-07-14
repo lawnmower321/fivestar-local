@@ -14,6 +14,8 @@ MAP
 - types.ts — shared types (Business, Review, GateReport, GeneratedReply)
 - db.ts — Supabase factory + typed queries (service-role key, server-only)
 - auth.ts — passcode hashing/verification for the /admin cookie
+- kb-sections.ts — pure markdown-section merge/extract (founder-authored
+  recovery section survives KB rebuilds)
 - gates/ — reply quality gates (see gates/CLAUDE.md)
 - ai/ — prompt builders + OpenRouter callers (see ai/CLAUDE.md)
 
