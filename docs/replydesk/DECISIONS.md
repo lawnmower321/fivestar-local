@@ -141,3 +141,12 @@ phrase per reply; negatives reference the real recovery action, phrased as an
 action, never contact info (hard gate still enforces). No DB migration — the
 KB stays one markdown column. Spec:
 docs/superpowers/specs/2026-07-13-kb-prompt-redesign-design.md.
+
+## 2026-07-14 — Business hard-delete from the detail page
+Added a "Danger zone" on the business detail page: type-the-exact-name to arm,
+then `deleteBusinessAction` (self-authenticating) hard-deletes the row; reviews
+cascade via the existing FK, so no migration. The action catches DB errors and
+RETURNS `{ error }` (shown in the card) so that `redirect("/admin")` stays
+outside any try/catch, per Next 16's redirect rules. Businesses only — reviews
+stay non-deletable (they are the similarity gate's audit trail). Soft delete is
+deferred to the CRM phases (spec 2026-07-14-crm-evolution-design.md).
