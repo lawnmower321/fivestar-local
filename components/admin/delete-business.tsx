@@ -37,6 +37,7 @@ export function DeleteBusiness({
         value={confirm}
         onChange={(e) => setConfirm(e.target.value)}
         placeholder={businessName}
+        aria-label="Type the business name to confirm deletion"
         className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-gred"
       />
       <button

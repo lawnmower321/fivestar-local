@@ -39,6 +39,7 @@ describe("countReviews", () => {
     const { db, calls } = fakeDb({ count: 3 });
     expect(await countReviews(db, "biz-1")).toBe(3);
     expect(calls).toContainEqual({ method: "from", args: ["reviews"] });
+    expect(calls).toContainEqual({ method: "select", args: ["*", { count: "exact", head: true }] });
     expect(calls).toContainEqual({ method: "eq", args: ["business_id", "biz-1"] });
   });
 
