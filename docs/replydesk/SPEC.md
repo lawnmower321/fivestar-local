@@ -27,8 +27,11 @@ become customer-facing later. Access: one shared passcode.
 ## Reply rules (baked into the system prompt)
 - Reference exactly one specific detail from the customer's review.
 - Vary structure; never echo recent replies' shape.
+- Weave in at most ONE signature-language phrase or the neighborhood name,
+  and only when it fits naturally (local SEO without keyword stuffing).
 - Negative (≤3★): short, one non-defensive apology, move resolution offline
-  WITHOUT posting contact info.
+  WITHOUT posting contact info — referencing the KB's real make-it-right
+  action ("When Something Goes Wrong") when one exists.
 - Sound like the owner (voice profile), never corporate, never "Thank you for
   your review" openers, no emojis unless the voice profile uses them.
 

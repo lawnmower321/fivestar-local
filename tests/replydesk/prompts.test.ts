@@ -32,6 +32,17 @@ describe("reply prompts", () => {
     expect(buildReplyUserPrompt({ ...baseInput, varyStructure: true }))
       .toMatch(/completely different structure/i);
   });
+
+  it("caps signature language at one phrase", () => {
+    expect(REPLY_SYSTEM_PROMPT).toMatch(/Signature Language/);
+    expect(REPLY_SYSTEM_PROMPT).toMatch(/AT MOST ONE/);
+    expect(REPLY_SYSTEM_PROMPT).toMatch(/reads like marketing copy is a failed reply/i);
+  });
+
+  it("directs negative replies to the real recovery action", () => {
+    expect(REPLY_SYSTEM_PROMPT).toMatch(/"When Something Goes Wrong"/);
+    expect(REPLY_SYSTEM_PROMPT).toMatch(/never as contact info/i);
+  });
 });
 
 describe("kb prompt", () => {
