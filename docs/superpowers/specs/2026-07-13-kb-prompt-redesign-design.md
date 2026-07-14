@@ -50,19 +50,27 @@ never answer FAQs, so it would be dead weight at reply time.
 KB stays one `kb_md` text column. The recovery policy is a markdown section,
 not a column.
 
-`upsertKbSection(kbMd, sectionTitle, body): string`
-- Pure string function, no I/O, lives in lib/replydesk/kb-sections.ts.
-- Replaces the named `##` section if present; otherwise inserts it before
-  "## Facts a reply might reference" (appends at end if that anchor is
-  missing). Idempotent.
+lib/replydesk/kb-sections.ts — two pure string functions, no I/O:
+- `upsertKbSection(kbMd, sectionTitle, body): string` — replaces the named
+  `##` section if present; otherwise inserts it before "## Facts a reply
+  might reference" (appends at end if that anchor is missing). Idempotent.
+- `extractKbSection(kbMd, sectionTitle): string | null` — returns a section's
+  body (without its heading) or null.
 
-kb-builder.tsx adds a fourth input: labeled textarea "When something goes
-wrong, how do you make it right?" with helper text (e.g. "We remake the dish
-on the spot, no questions. For jobs, Tony re-inspects within 48h."). Its
-button merges the text into the KB textarea via `upsertKbSection`; saving
-still goes through the existing `saveKbAction`. Empty input disables the
-button. No LLM call — zero hallucination risk, zero added cost, and the
+kb-builder.tsx adds a fourth TAB, "Make-it-right policy", alongside the
+existing url/paste/voice tabs: a labeled textarea "When something goes wrong,
+how do you make it right?" with helper text (e.g. "We remake the dish on the
+spot, no questions. For jobs, Tony re-inspects within 48h.") and an "Add to
+KB" button that merges the text into the KB textarea via `upsertKbSection`;
+saving still goes through the existing `saveKbAction`. Empty input disables
+the button. No LLM call — zero hallucination risk, zero added cost, and the
 founder's own wording is the authentic voice.
+
+Rebuild preservation: because the KB model is forbidden from emitting "When
+Something Goes Wrong", a rebuild from URL/paste would otherwise silently wipe
+the founder's section. So the URL/paste build handlers must, before replacing
+the KB textarea, `extractKbSection` the current recovery section and, if
+present, re-`upsertKbSection` it into the freshly built markdown.
 
 ## Reply prompt rules (reply.ts)
 
@@ -87,7 +95,9 @@ build/extract error paths (fetch guard, empty-response throws) are untouched.
 ## Testing
 
 - NEW tests/replydesk/kb-sections.test.ts: appends when absent, replaces when
-  present, preserves other sections, stable ordering, idempotency.
+  present, preserves other sections, stable ordering, idempotency;
+  extractKbSection returns body / null; extract→upsert round-trip preserves
+  the recovery section across a simulated rebuild.
 - EXTENDED tests/replydesk/prompts.test.ts: KB system prompt names all 8
   sections and forbids inventing the recovery section; reply system prompt
   contains the one-phrase cap and the recovery-action rule.
