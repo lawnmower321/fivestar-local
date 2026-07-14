@@ -127,3 +127,17 @@ exhausting the budget → truncated/empty markdown → thrown "no text". Raised 
 KB 8000 / voice 4000. Optional future cost tweak: disable reasoning on the KB
 call via OpenRouter's `reasoning:{enabled:false}` (not done — it's outside the
 OpenAI SDK's param types and would need a cast).
+
+## 2026-07-13 — KB redesigned to 8 sections; recovery policy is founder-only
+Research-driven: replies referencing real specifics beat templates (72% of
+consumers distrust AI-sounding replies); review responses are crawled, so ONE
+naturally-woven service/location phrase is a local-SEO lever (stuffing is
+penalized); negative replies should offer the business's real make-it-right
+action. New sections: "Signature Language" (model-sourced) and "When Something
+Goes Wrong" (founder-authored, merged verbatim by lib/replydesk/kb-sections.ts,
+NEVER model-generated — the KB prompt forbids it and URL/paste rebuilds
+re-merge it so it survives). Reply prompt: at most ONE signature/neighborhood
+phrase per reply; negatives reference the real recovery action, phrased as an
+action, never contact info (hard gate still enforces). No DB migration — the
+KB stays one markdown column. Spec:
+docs/superpowers/specs/2026-07-13-kb-prompt-redesign-design.md.

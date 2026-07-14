@@ -29,9 +29,10 @@ Nothing has been merged, pushed, or discarded. Pick up here.
 ## What is DONE
 
 ### Feature
-ReplyDesk: a passcode-protected `/admin` console where founders build a per-customer
-knowledgebase and generate on-brand Google-review replies that pass code-level
-anti-moderation quality gates.
+ReplyDesk: a passcode-protected `/admin` console where founders build a
+per-customer knowledgebase (8 sections incl. founder-authored make-it-right
+policy + signature language) and generate on-brand Google-review replies that
+pass code-level anti-moderation quality gates.
 
 | Task | What it delivered | Commits |
 |------|-------------------|---------|
