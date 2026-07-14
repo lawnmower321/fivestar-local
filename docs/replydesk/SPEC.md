@@ -8,12 +8,14 @@ The two founders only (v1). Built multi-tenant (per-business rows) so it can
 become customer-facing later. Access: one shared passcode.
 
 ## Core loops
-1. **Knowledgebase builder** — per business, three input methods, all producing
+1. **Knowledgebase builder** — per business, four input methods, all producing
    editable markdown stored on the business row:
    - Website URL → server fetches the page → model distills → structured KB
    - Pasted raw info → same distillation
    - Pasted past review replies → a separate *voice profile* (tone, length,
      sign-off, recurring phrases)
+   - Typed make-it-right policy → merged verbatim as "When Something Goes
+     Wrong" (never AI-generated; survives KB rebuilds)
 2. **Reply generation** — paste a review + star rating → the model returns
    `{ reply, detail_referenced }` → code-level quality gates run → founder
    copies the reply into Google as profile manager → review marked `posted`.

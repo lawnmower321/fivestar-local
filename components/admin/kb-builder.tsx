@@ -6,14 +6,18 @@ import {
   buildKbFromUrlAction, buildKbFromTextAction, extractVoiceAction,
   saveKbAction, saveVoiceAction,
 } from "@/app/admin/actions";
+import { upsertKbSection, extractKbSection, RECOVERY_SECTION } from "@/lib/replydesk/kb-sections";
 
-type Tab = "url" | "paste" | "voice";
+type Tab = "url" | "paste" | "voice" | "recovery";
 
 export function KbBuilder({ business }: { business: Business }) {
   const [tab, setTab] = useState<Tab>("url");
   const [url, setUrl] = useState("");
   const [raw, setRaw] = useState("");
   const [pastReplies, setPastReplies] = useState("");
+  const [recovery, setRecovery] = useState(
+    () => extractKbSection(business.kbMd, RECOVERY_SECTION) ?? "",
+  );
   const [kb, setKb] = useState(business.kbMd);
   const [voice, setVoice] = useState(business.voiceMd);
   const [status, setStatus] = useState<string | null>(null);
@@ -37,6 +41,7 @@ export function KbBuilder({ business }: { business: Business }) {
         <button className={tabClass("url")} onClick={() => setTab("url")}>From website</button>
         <button className={tabClass("paste")} onClick={() => setTab("paste")}>From pasted info</button>
         <button className={tabClass("voice")} onClick={() => setTab("voice")}>Voice from past replies</button>
+        <button className={tabClass("recovery")} onClick={() => setTab("recovery")}>Make-it-right policy</button>
       </div>
 
       {tab === "url" && (
@@ -45,7 +50,11 @@ export function KbBuilder({ business }: { business: Business }) {
             placeholder="https://their-website.com"
             className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-gblue" />
           <button disabled={pending || !url}
-            onClick={() => run(async () => setKb(await buildKbFromUrlAction(business.id, url)))}
+            onClick={() => run(async () => {
+              const built = await buildKbFromUrlAction(business.id, url);
+              const policy = extractKbSection(kb, RECOVERY_SECTION);
+              setKb(policy ? upsertKbSection(built, RECOVERY_SECTION, policy) : built);
+            })}
             className="rounded-lg bg-gblue px-4 py-2 text-sm font-medium text-white hover:bg-gblue/90 disabled:opacity-50">
             {pending ? "Reading site…" : "Build KB"}
           </button>
@@ -58,7 +67,11 @@ export function KbBuilder({ business }: { business: Business }) {
             placeholder="Paste anything the owner told you: services, hours, staff names, specialties…"
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-gblue" />
           <button disabled={pending || !raw}
-            onClick={() => run(async () => setKb(await buildKbFromTextAction(business.id, raw)))}
+            onClick={() => run(async () => {
+              const built = await buildKbFromTextAction(business.id, raw);
+              const policy = extractKbSection(kb, RECOVERY_SECTION);
+              setKb(policy ? upsertKbSection(built, RECOVERY_SECTION, policy) : built);
+            })}
             className="rounded-lg bg-gblue px-4 py-2 text-sm font-medium text-white hover:bg-gblue/90 disabled:opacity-50">
             {pending ? "Distilling…" : "Build KB"}
           </button>
@@ -74,6 +87,30 @@ export function KbBuilder({ business }: { business: Business }) {
             onClick={() => run(async () => setVoice(await extractVoiceAction(business.id, pastReplies)))}
             className="rounded-lg bg-gblue px-4 py-2 text-sm font-medium text-white hover:bg-gblue/90 disabled:opacity-50">
             {pending ? "Analyzing voice…" : "Extract voice profile"}
+          </button>
+        </div>
+      )}
+
+      {tab === "recovery" && (
+        <div className="mt-4 space-y-2">
+          <label className="block text-sm font-medium text-slate-700">
+            When something goes wrong, how do you make it right?
+          </label>
+          <p className="text-xs text-slate-500">
+            Your own words, saved verbatim — negative-review replies will offer this
+            real action instead of a generic apology. Phone numbers/emails are
+            stripped by the contact-info gate, so describe the action, not a number.
+          </p>
+          <textarea value={recovery} onChange={(e) => setRecovery(e.target.value)} rows={3}
+            placeholder="e.g. We remake the dish on the spot, no questions. For jobs, Tony re-inspects within 48h."
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-gblue" />
+          <button disabled={pending || !recovery.trim()}
+            onClick={() => {
+              setKb(upsertKbSection(kb, RECOVERY_SECTION, recovery));
+              setStatus("Policy added to the KB below — click Save KB to store it.");
+            }}
+            className="rounded-lg bg-gblue px-4 py-2 text-sm font-medium text-white hover:bg-gblue/90 disabled:opacity-50">
+            Add to KB
           </button>
         </div>
       )}
