@@ -93,3 +93,37 @@ gates live at `../gates/`, but from `lib/replydesk/ai/prompts/` the correct
 relative path is `../../gates/` (prompts → ai → replydesk → gates). Fixed the
 doc; no other `CLAUDE.md` (`lib/replydesk/`, `gates/`, `ai/`, `app/admin/`,
 `components/admin/`) had a false statement against the shipped code.
+
+## 2026-07-13 — Switched from direct Anthropic API to OpenRouter, one key
+Consolidated on a single `OPENROUTER_API_KEY` instead of per-vendor keys.
+Model choice became a per-task decision instead of one mandated model:
+`REPLY_MODEL` = openai/gpt-4.1-mini, `KB_MODEL` = deepseek/deepseek-v4-pro,
+`VOICE_MODEL` = google/gemini-2.5-pro (all user-chosen; verified live against
+OpenRouter's `/api/v1/models` catalog since two initially-named slugs didn't
+exist — "claude-opus-4-8" is a direct-Anthropic-only id, and "opus 4.1 mini"
+was a typo for openai/gpt-4.1-mini). Client moved from `@anthropic-ai/sdk` to
+the `openai` package pointed at OpenRouter's OpenAI-compatible endpoint
+(client.ts); `output_config`/`response_format` json_schema mode carried over
+directly on the reply-generation call.
+One real capability loss: Anthropic's server-side `web_fetch` tool (used by
+buildKnowledgebase to fetch a business's homepage and follow up to 4 same-site
+links) has no OpenRouter equivalent — OpenRouter's `:online` plugin does
+general web *search*, not targeted URL fetch-and-crawl. Replaced with a plain
+server-side `fetch()` of the given URL only (build-knowledgebase.ts
+`fetchPageText`), stripped to text and capped at 20k chars, single page, no
+link-following. Chosen over the `:online` plugin (less precise, per-search
+cost) and over keeping a second Anthropic-only key for just this one call
+(defeats the one-key goal). If a business's key facts live on a linked
+About/Menu page rather than the homepage, the KB builder will now miss them —
+acceptable for now; falls back to the paste-text KB path.
+Two follow-on fixes from the review of this switch: (a) the KB fetch now
+throws a "paste the info instead" error when the page yields < 200 chars of
+text (JS-rendered SPAs return an empty shell to a plain `fetch()`); (b) both
+replacement summarization models are REASONING models whose thinking tokens
+are billed against `max_tokens` — deepseek-v4-pro defaults to "high" effort
+and gemini-2.5-pro's reasoning is MANDATORY (undisableable). The budgets
+inherited from non-thinking Opus (KB 4000, voice 1500) risked thinking
+exhausting the budget → truncated/empty markdown → thrown "no text". Raised to
+KB 8000 / voice 4000. Optional future cost tweak: disable reasoning on the KB
+call via OpenRouter's `reasoning:{enabled:false}` (not done — it's outside the
+OpenAI SDK's param types and would need a cast).

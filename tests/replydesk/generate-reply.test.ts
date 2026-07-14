@@ -1,24 +1,25 @@
 import { describe, it, expect } from "vitest";
-import type Anthropic from "@anthropic-ai/sdk";
+import type OpenAI from "openai";
 import { generateReply } from "@/lib/replydesk/ai/generate-reply";
 
-// Minimal fake of the Anthropic client: returns queued canned JSON replies.
+// Minimal fake of the OpenAI (OpenRouter) client: returns queued canned JSON replies.
 function fakeClient(replies: Array<{ reply: string; detail_referenced: string }>) {
   let call = 0;
   const calls: unknown[] = [];
   const client = {
-    messages: {
-      create: async (params: unknown) => {
-        calls.push(params);
-        const body = replies[Math.min(call, replies.length - 1)];
-        call++;
-        return {
-          stop_reason: "end_turn",
-          content: [{ type: "text", text: JSON.stringify(body) }],
-        };
+    chat: {
+      completions: {
+        create: async (params: unknown) => {
+          calls.push(params);
+          const body = replies[Math.min(call, replies.length - 1)];
+          call++;
+          return {
+            choices: [{ message: { content: JSON.stringify(body) } }],
+          };
+        },
       },
     },
-  } as unknown as Anthropic;
+  } as unknown as OpenAI;
   return { client, calls };
 }
 
@@ -82,13 +83,14 @@ describe("generateReply", () => {
   it("does not throw on malformed (non-JSON) model output and returns a flagged result", async () => {
     // Fake client that returns plain text instead of the expected JSON schema.
     const client = {
-      messages: {
-        create: async () => ({
-          stop_reason: "end_turn",
-          content: [{ type: "text", text: "Sorry, I can't help with that." }],
-        }),
+      chat: {
+        completions: {
+          create: async () => ({
+            choices: [{ message: { content: "Sorry, I can't help with that." } }],
+          }),
+        },
       },
-    } as unknown as Anthropic;
+    } as unknown as OpenAI;
     const out = await generateReply(client, input);
     expect(out.gate.ok).toBe(false);
     expect(out.attempts).toBe(3);

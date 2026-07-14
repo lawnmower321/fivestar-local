@@ -4,9 +4,9 @@ Pure, dependency-injected business logic for ReplyDesk (see docs/replydesk/SPEC.
 
 INVARIANTS
 - Nothing in this tree imports from `next/*` or uses `use server`. Plain Node.
-- External clients (Anthropic, Supabase) are constructed in `client.ts`/`db.ts`
+- External clients (OpenRouter, Supabase) are constructed in `client.ts`/`db.ts`
   factories and INJECTED into logic functions, so tests pass fakes.
-- Model is exactly `claude-opus-4-8`; no temperature/top_p/top_k/budget_tokens.
+- One provider key (`OPENROUTER_API_KEY`), one model per task — see ai/CLAUDE.md.
 - Quality gates (gates/) run in code AFTER generation. AI output is never
   trusted to self-certify.
 
@@ -15,6 +15,6 @@ MAP
 - db.ts — Supabase factory + typed queries (service-role key, server-only)
 - auth.ts — passcode hashing/verification for the /admin cookie
 - gates/ — reply quality gates (see gates/CLAUDE.md)
-- ai/ — prompt builders + Anthropic callers (see ai/CLAUDE.md)
+- ai/ — prompt builders + OpenRouter callers (see ai/CLAUDE.md)
 
 TESTS: tests/replydesk/

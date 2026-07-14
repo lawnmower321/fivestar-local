@@ -10,11 +10,11 @@ become customer-facing later. Access: one shared passcode.
 ## Core loops
 1. **Knowledgebase builder** — per business, three input methods, all producing
    editable markdown stored on the business row:
-   - Website URL → Claude reads the site (web_fetch tool) → structured KB
+   - Website URL → server fetches the page → model distills → structured KB
    - Pasted raw info → same distillation
    - Pasted past review replies → a separate *voice profile* (tone, length,
      sign-off, recurring phrases)
-2. **Reply generation** — paste a review + star rating → Claude returns
+2. **Reply generation** — paste a review + star rating → the model returns
    `{ reply, detail_referenced }` → code-level quality gates run → founder
    copies the reply into Google as profile manager → review marked `posted`.
 
@@ -37,5 +37,8 @@ Customer logins, billing, auto-posting (blocked on Google Business Profile API
 approval — see GBP-API.md), monthly reports (data is logged for it), mobile.
 
 ## Cost & model
-`claude-opus-4-8` everywhere. At expected volume (≤1,000 replies/mo) total API
-cost ≈ $10–15/mo.
+All calls route through OpenRouter on one key. One model per task: reply
+generation (openai/gpt-4.1-mini), knowledgebase building (deepseek/deepseek-v4-pro),
+voice extraction (google/gemini-2.5-pro) — see DECISIONS.md 2026-07-13. At
+expected volume (≤1,000 replies/mo) total API cost is well under the original
+Claude-Opus-only estimate of $10–15/mo.

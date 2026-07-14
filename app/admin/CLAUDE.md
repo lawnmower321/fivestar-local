@@ -6,7 +6,7 @@ logic lives here.
 INVARIANTS
 - Every page under /admin (except login) assumes the layout guard ran:
   a valid rd_session cookie (sha256 of REPLYDESK_PASSCODE).
-- Server actions in actions.ts: construct real clients (getDb, getAnthropic),
+- Server actions in actions.ts: construct real clients (getDb, getOpenRouter),
   call lib/replydesk functions, revalidatePath. They contain NO logic.
 - Server actions SELF-AUTHENTICATE: the (protected) layout guards page render
   only, not action POST endpoints, and there is no middleware. Every action in

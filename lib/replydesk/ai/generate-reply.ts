@@ -1,5 +1,5 @@
-import type Anthropic from "@anthropic-ai/sdk";
-import { MODEL, textOf } from "./client";
+import type OpenAI from "openai";
+import { REPLY_MODEL, textOf } from "./client";
 import { REPLY_SYSTEM_PROMPT, buildReplyUserPrompt } from "./prompts/reply";
 import { runGates } from "../gates";
 import type { GeneratedReply } from "../types";
@@ -17,7 +17,7 @@ const REPLY_SCHEMA = {
 const MAX_ATTEMPTS = 3;
 
 export async function generateReply(
-  anthropic: Anthropic,
+  openrouter: OpenAI,
   input: {
     businessName: string;
     kbMd: string;
@@ -31,12 +31,15 @@ export async function generateReply(
   let last: GeneratedReply | null = null;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    const response = await anthropic.messages.create({
-      model: MODEL,
+    const response = await openrouter.chat.completions.create({
+      model: REPLY_MODEL,
       max_tokens: 1000,
-      system: REPLY_SYSTEM_PROMPT,
-      output_config: { format: { type: "json_schema", schema: REPLY_SCHEMA } },
+      response_format: {
+        type: "json_schema",
+        json_schema: { name: "reply", strict: true, schema: REPLY_SCHEMA },
+      },
       messages: [
+        { role: "system", content: REPLY_SYSTEM_PROMPT },
         {
           role: "user",
           content: buildReplyUserPrompt({ ...input, varyStructure: attempt > 1 }),

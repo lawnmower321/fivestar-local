@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getDb, createBusiness, getBusiness, updateBusiness, insertReview, markPosted, recentPostedReplies } from "@/lib/replydesk/db";
-import { getAnthropic } from "@/lib/replydesk/ai/client";
+import { getOpenRouter } from "@/lib/replydesk/ai/client";
 import { generateReply } from "@/lib/replydesk/ai/generate-reply";
 import { buildKnowledgebase } from "@/lib/replydesk/ai/build-knowledgebase";
 import { extractVoice } from "@/lib/replydesk/ai/extract-voice";
@@ -36,17 +36,17 @@ export async function saveVoiceAction(businessId: string, voiceMd: string): Prom
 export async function buildKbFromUrlAction(_businessId: string, url: string): Promise<string> {
   await requireSession();
   if (!/^https?:\/\//.test(url)) throw new Error("URL must start with http(s)://");
-  return buildKnowledgebase(getAnthropic(), { kind: "url", url });
+  return buildKnowledgebase(getOpenRouter(), { kind: "url", url });
 }
 
 export async function buildKbFromTextAction(_businessId: string, raw: string): Promise<string> {
   await requireSession();
-  return buildKnowledgebase(getAnthropic(), { kind: "text", raw });
+  return buildKnowledgebase(getOpenRouter(), { kind: "text", raw });
 }
 
 export async function extractVoiceAction(_businessId: string, pastReplies: string): Promise<string> {
   await requireSession();
-  return extractVoice(getAnthropic(), pastReplies);
+  return extractVoice(getOpenRouter(), pastReplies);
 }
 
 export async function generateReplyAction(input: {
@@ -62,7 +62,7 @@ export async function generateReplyAction(input: {
   const db = getDb();
   const business = await getBusiness(db, input.businessId);
   const recent = await recentPostedReplies(db, input.businessId, 10);
-  const out = await generateReply(getAnthropic(), {
+  const out = await generateReply(getOpenRouter(), {
     businessName: business.name,
     kbMd: business.kbMd,
     voiceMd: business.voiceMd,
