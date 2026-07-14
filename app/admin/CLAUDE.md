@@ -12,8 +12,10 @@ INVARIANTS
   UI — but keep the same Tailwind design language as the site.
 
 MAP
-- login/ — passcode form (sets cookie); lives OUTSIDE the (protected) route
-  group so it renders without the guard and without a redirect loop.
+- login/ — email+password sign-in form (Supabase Auth signInWithPassword; the
+  @supabase/ssr cookie adapter sets the session cookies, not the action). Lives
+  OUTSIDE the (protected) route group so it renders without the guard and
+  without a redirect loop.
 - (protected)/layout.tsx — auth guard + nav. A route group (no URL segment):
   everything placed inside it requires a valid session; login/ is a sibling,
   not a child, so it is never subject to this guard.
