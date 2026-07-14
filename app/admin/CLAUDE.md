@@ -4,15 +4,10 @@ Thin Next.js shell over lib/replydesk. UI + server actions only; no business
 logic lives here.
 
 INVARIANTS
-- Every page under /admin (except login) assumes the layout guard ran:
-  a valid rd_session cookie (sha256 of REPLYDESK_PASSCODE).
+- Every page under /admin (except login) assumes the layout guard ran: a valid Supabase Auth session (validated via getClaims()). proxy.ts refreshes session cookies for /admin/*; the (protected)/ layout owns the redirect guard.
 - Server actions in actions.ts: construct real clients (getDb, getOpenRouter),
   call lib/replydesk functions, revalidatePath. They contain NO logic.
-- Server actions SELF-AUTHENTICATE: the (protected) layout guards page render
-  only, not action POST endpoints, and there is no middleware. Every action in
-  actions.ts calls `await requireSession()` (require-session.ts) as its first
-  statement; the login action is exempt. require-session.ts reads cookies() so
-  it lives here in the shell, never in lib/replydesk (no next/* there).
+- Server actions SELF-AUTHENTICATE: every action calls await requireUser() (require-user.ts) as its first statement and zod-parses its input (schemas.ts) before any DB/AI call; the login action is exempt. require-user.ts reads the session via the @supabase/ssr auth client (auth-client.ts) so it lives here in the shell, never in lib/replydesk (no next/* there).
 - Secrets are read only inside server code. Nothing here is public marketing
   UI — but keep the same Tailwind design language as the site.
 

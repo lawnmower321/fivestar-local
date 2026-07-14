@@ -150,3 +150,16 @@ RETURNS `{ error }` (shown in the card) so that `redirect("/admin")` stays
 outside any try/catch, per Next 16's redirect rules. Businesses only — reviews
 stay non-deletable (they are the similarity gate's audit trail). Soft delete is
 deferred to the CRM phases (spec 2026-07-14-crm-evolution-design.md).
+
+## 2026-07-14 — Phase 1: shared passcode → Supabase Auth (two founder accounts)
+Auth now uses @supabase/ssr with a SERVER-ONLY publishable key (no
+NEXT_PUBLIC_: the browser never talks to Supabase; login/logout/validation
+all run in server actions and proxy.ts). Sessions are validated with
+getClaims() (JWT signature check) — never getSession() — in proxy.ts
+(refresh only, matcher /admin/:path*), the (protected) layout (guard), and
+requireUser() (first line of every action, replacing requireSession). The
+passcode module (lib/replydesk/auth.ts) and its tests are deleted;
+REPLYDESK_PASSCODE retires. All action inputs are now zod-parsed
+(app/admin/schemas.ts) immediately after requireUser(). The profiles table
+(migration 0002) holds display names for attribution; RLS on, zero policies
+(service-role access only), rows seeded manually while self-signup is off.
