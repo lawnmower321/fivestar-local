@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { REPLY_SYSTEM_PROMPT, buildReplyUserPrompt } from "@/lib/replydesk/ai/prompts/reply";
+import { KB_SYSTEM_PROMPT } from "@/lib/replydesk/ai/prompts/kb";
 
 const baseInput = {
   businessName: "Tony's Pizza",
@@ -30,5 +31,34 @@ describe("reply prompts", () => {
     expect(buildReplyUserPrompt(baseInput)).not.toMatch(/completely different structure/i);
     expect(buildReplyUserPrompt({ ...baseInput, varyStructure: true }))
       .toMatch(/completely different structure/i);
+  });
+});
+
+describe("kb prompt", () => {
+  it("names every model-produced section", () => {
+    for (const heading of [
+      "## Overview",
+      "## Services & Products",
+      "## Signature Language",
+      "## Hours & Location",
+      "## People",
+      "## Specialties & Crowd Favorites",
+      "## Facts a reply might reference",
+    ]) {
+      expect(KB_SYSTEM_PROMPT).toContain(heading);
+    }
+  });
+
+  it("forbids the model from writing the recovery section", () => {
+    expect(KB_SYSTEM_PROMPT).toMatch(/NEVER write a "When Something Goes Wrong" section/);
+  });
+
+  it("keeps the never-invent rule", () => {
+    expect(KB_SYSTEM_PROMPT).toMatch(/NEVER invent/);
+  });
+
+  it("asks for neighborhood identity and natural phrases", () => {
+    expect(KB_SYSTEM_PROMPT).toMatch(/neighborhood/i);
+    expect(KB_SYSTEM_PROMPT).toMatch(/sound like speech, not marketing copy/i);
   });
 });
