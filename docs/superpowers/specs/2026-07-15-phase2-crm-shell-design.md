@@ -134,7 +134,9 @@ app/admin/(protected)/
   inline (kb-builder pattern).
 - Client list table: shadcn Table + Badge, rows link to the client record.
   Contact column shows `contactName · contactEmail` (whichever are present,
-  ·-joined; both absent → "—"). Status badge classes: lead
+  ·-joined; both absent → "—"). A shared
+  `components/admin/status-badge.tsx` renders the badge (used by the list
+  and the client-record header). Status badge classes: lead
   `bg-slate-100 text-slate-600`, active `bg-ggreen/10 text-ggreen`, paused
   `bg-gyellow/15 text-yellow-700`, churned `bg-slate-100 text-slate-400`.
 - Existing `delete-business.tsx` is reused unchanged; the Overview page
@@ -147,18 +149,19 @@ Base UI), `shadcn@4.13` CLI in deps, full CSS-variable theme (incl.
 sidebar tokens) already in `globals.css`, and `components/ui/button.tsx` +
 `accordion.tsx` already present and **imported by the marketing site**.
 
-- Add NEW components only: `npx shadcn add sidebar table badge select
-  input label` (sidebar pulls its own deps — sheet, tooltip, skeleton,
-  separator, use-mobile hook — all new files).
+- Add NEW components only: `npx shadcn add sidebar table badge` (sidebar
+  pulls its own registry deps — input, separator, sheet, skeleton, tooltip,
+  use-mobile — as new files; button already exists and is reused). The
+  details form and add-client form use native fields styled like the
+  existing admin forms — no shadcn Select/Input/Label components needed.
 - **Hard rule:** never overwrite `components/ui/button.tsx` or
   `components/ui/accordion.tsx`. If the CLI prompts to overwrite existing
   files, decline; new components may import the existing button as-is.
-- **Registry risk:** the `base-nova` registry is newer than the classic
-  radix one; component availability (esp. sidebar) must be VERIFIED as the
-  plan's first UI step. Fallback if a component is missing: hand-roll the
+- **Registry availability verified 2026-07-15:** `sidebar`, `table`, and
+  `badge` all exist in the `base-nova` registry (`npx shadcn view`).
+  Should the CLI still fail at execution time, fallback: hand-roll the
   sidebar/table in the existing admin design language (border-slate-200,
-  rounded-2xl, gblue accents) — the admin already does this well. The
-  fallback changes zero interfaces; only the two shell files' internals.
+  rounded-2xl, gblue accents) — interfaces unchanged.
 - `globals.css` is expected to need NO changes (theme complete). If the
   CLI insists on editing it, that diff must be reviewed line-by-line and
   kept minimal — it is a shared file with the marketing site.
