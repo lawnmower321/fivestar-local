@@ -9,10 +9,11 @@ import { buildKnowledgebase } from "@/lib/replydesk/ai/build-knowledgebase";
 import { extractVoice } from "@/lib/replydesk/ai/extract-voice";
 import { requireUser } from "./require-user";
 import { getAuthClient } from "./auth-client";
+import { canDeleteBusiness } from "@/lib/crm/status";
 import {
   createBusinessSchema, saveKbSchema, saveVoiceSchema, buildKbFromUrlSchema,
   buildKbFromTextSchema, extractVoiceSchema, generateReplySchema,
-  markPostedSchema, deleteBusinessSchema,
+  markPostedSchema, deleteBusinessSchema, updateClientSchema,
 } from "./schemas";
 
 export async function createBusinessAction(formData: FormData): Promise<void> {
@@ -22,21 +23,21 @@ export async function createBusinessAction(formData: FormData): Promise<void> {
     reviewUrl: String(formData.get("reviewUrl") ?? ""),
   });
   const b = await createBusiness(getDb(), input);
-  redirect(`/admin/businesses/${b.id}`);
+  redirect(`/admin/clients/${b.id}`);
 }
 
 export async function saveKbAction(businessId: string, kbMd: string): Promise<void> {
   await requireUser();
   const input = saveKbSchema.parse({ businessId, kbMd });
   await updateBusiness(getDb(), input.businessId, { kbMd: input.kbMd });
-  revalidatePath(`/admin/businesses/${input.businessId}`);
+  revalidatePath(`/admin/clients/${input.businessId}/replydesk`);
 }
 
 export async function saveVoiceAction(businessId: string, voiceMd: string): Promise<void> {
   await requireUser();
   const input = saveVoiceSchema.parse({ businessId, voiceMd });
   await updateBusiness(getDb(), input.businessId, { voiceMd: input.voiceMd });
-  revalidatePath(`/admin/businesses/${input.businessId}`);
+  revalidatePath(`/admin/clients/${input.businessId}/replydesk`);
 }
 
 export async function buildKbFromUrlAction(businessId: string, url: string): Promise<string> {
@@ -90,7 +91,7 @@ export async function generateReplyAction(input: {
     similarity: out.gate.similarity,
     flags: out.gate.reasons,
   });
-  revalidatePath(`/admin/businesses/${p.businessId}`);
+  revalidatePath(`/admin/clients/${p.businessId}/replydesk`);
   return {
     reviewId: saved.id,
     reply: out.reply,
@@ -106,18 +107,49 @@ export async function markPostedAction(reviewId: string, businessId: string): Pr
   await requireUser();
   const input = markPostedSchema.parse({ reviewId, businessId });
   await markPosted(getDb(), input.reviewId);
-  revalidatePath(`/admin/businesses/${input.businessId}`);
+  revalidatePath(`/admin/clients/${input.businessId}/replydesk`);
 }
 
 export async function deleteBusinessAction(businessId: string): Promise<{ error: string } | void> {
   await requireUser();
   const input = deleteBusinessSchema.parse({ businessId });
   try {
-    await deleteBusiness(getDb(), input.businessId);
+    const db = getDb();
+    const business = await getBusiness(db, input.businessId);
+    if (!canDeleteBusiness(business.status)) {
+      return { error: "Only leads can be deleted — set the status to Churned instead." };
+    }
+    await deleteBusiness(db, input.businessId);
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Delete failed — try again." };
   }
-  redirect("/admin");
+  redirect("/admin/clients");
+}
+
+export async function updateClientDetailsAction(
+  businessId: string,
+  details: {
+    status: string;
+    contactName: string;
+    contactEmail: string;
+    contactPhone: string;
+    reviewUrl: string;
+  },
+): Promise<{ error: string } | void> {
+  await requireUser();
+  const input = updateClientSchema.parse({ businessId, ...details });
+  try {
+    await updateBusiness(getDb(), input.businessId, {
+      status: input.status,
+      contactName: input.contactName,
+      contactEmail: input.contactEmail,
+      contactPhone: input.contactPhone,
+      reviewUrl: input.reviewUrl,
+    });
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Save failed — try again." };
+  }
+  revalidatePath(`/admin/clients/${input.businessId}`, "layout");
 }
 
 export async function logoutAction(): Promise<void> {

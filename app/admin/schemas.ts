@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { STATUSES } from "@/lib/crm/status";
 
 // Every server action parses its input with one of these immediately after
 // requireUser() — malformed input fails before any DB or AI call.
@@ -33,3 +34,15 @@ export const generateReplySchema = z.object({
 
 export const markPostedSchema = z.object({ reviewId: z.uuid(), businessId: z.uuid() });
 export const deleteBusinessSchema = z.object({ businessId: z.uuid() });
+
+// Empty-string inputs from cleared form fields degrade to null.
+const optionalTrimmed = z.string().trim().transform((s) => (s === "" ? null : s));
+
+export const updateClientSchema = z.object({
+  businessId: z.uuid(),
+  status: z.enum(STATUSES),
+  contactName: optionalTrimmed,
+  contactEmail: optionalTrimmed.pipe(z.email().nullable()),
+  contactPhone: optionalTrimmed,
+  reviewUrl: z.string().trim().transform((s) => (HTTP_URL_RE.test(s) ? s : null)),
+});

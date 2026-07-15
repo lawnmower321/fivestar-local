@@ -3,6 +3,7 @@ import {
   loginSchema, createBusinessSchema, generateReplySchema,
   markPostedSchema, buildKbFromUrlSchema, buildKbFromTextSchema,
   saveKbSchema, saveVoiceSchema, extractVoiceSchema, deleteBusinessSchema,
+  updateClientSchema,
 } from "@/app/admin/schemas";
 
 const UUID = "a2f7c1de-3b44-4e6f-9a10-8a2f1c3d4e5f";
@@ -116,5 +117,38 @@ describe("deleteBusinessSchema", () => {
   });
   it("rejects a non-uuid businessId", () => {
     expect(deleteBusinessSchema.safeParse({ businessId: "nope" }).success).toBe(false);
+  });
+});
+
+describe("updateClientSchema", () => {
+  const base = {
+    businessId: UUID,
+    status: "active",
+    contactName: "Sam",
+    contactEmail: "sam@example.com",
+    contactPhone: "555-1234",
+    reviewUrl: "https://g.page/r/abc",
+  };
+  it("accepts a full valid update", () => {
+    expect(updateClientSchema.parse(base)).toEqual(base);
+  });
+  it("nulls empty contact fields and non-http review links", () => {
+    const out = updateClientSchema.parse({
+      businessId: UUID, status: "lead",
+      contactName: "  ", contactEmail: "", contactPhone: "", reviewUrl: "not a url",
+    });
+    expect(out).toEqual({
+      businessId: UUID, status: "lead",
+      contactName: null, contactEmail: null, contactPhone: null, reviewUrl: null,
+    });
+  });
+  it("rejects an unknown status", () => {
+    expect(updateClientSchema.safeParse({ ...base, status: "prospect" }).success).toBe(false);
+  });
+  it("rejects a malformed email", () => {
+    expect(updateClientSchema.safeParse({ ...base, contactEmail: "not-an-email" }).success).toBe(false);
+  });
+  it("rejects a non-uuid businessId", () => {
+    expect(updateClientSchema.safeParse({ ...base, businessId: "nope" }).success).toBe(false);
   });
 });
