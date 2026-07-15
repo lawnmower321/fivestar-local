@@ -1,21 +1,29 @@
 import { describe, it, expect } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { deleteBusiness, countReviews } from "@/lib/replydesk/db";
+import { deleteBusiness, countReviews, updateBusiness, getBusiness } from "@/lib/replydesk/db";
 
 type Call = { method: string; args: unknown[] };
 
-function fakeDb(result: { error?: { message: string } | null; count?: number | null }) {
+function fakeDb(result: {
+  error?: { message: string } | null;
+  count?: number | null;
+  data?: unknown;
+}) {
   const calls: Call[] = [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const builder: any = {};
-  for (const m of ["from", "delete", "select", "eq"]) {
+  for (const m of ["from", "delete", "select", "eq", "update", "single"]) {
     builder[m] = (...args: unknown[]) => {
       calls.push({ method: m, args });
       return builder;
     };
   }
   builder.then = (resolve: (v: unknown) => void) =>
-    resolve({ error: result.error ?? null, count: result.count ?? null });
+    resolve({
+      error: result.error ?? null,
+      count: result.count ?? null,
+      data: result.data ?? null,
+    });
   return { db: builder as unknown as SupabaseClient, calls };
 }
 
@@ -51,5 +59,50 @@ describe("countReviews", () => {
   it("throws the Supabase error message on failure", async () => {
     const { db } = fakeDb({ error: { message: "count boom" } });
     await expect(countReviews(db, "biz-1")).rejects.toThrow("count boom");
+  });
+});
+
+describe("updateBusiness", () => {
+  it("maps camelCase patch fields to snake_case columns", async () => {
+    const { db, calls } = fakeDb({ error: null });
+    await updateBusiness(db, "biz-1", {
+      status: "active",
+      contactName: "Sam",
+      contactEmail: "sam@example.com",
+      contactPhone: "555-1234",
+      reviewUrl: null,
+    });
+    const update = calls.find((c) => c.method === "update");
+    expect(update?.args[0]).toEqual({
+      status: "active",
+      contact_name: "Sam",
+      contact_email: "sam@example.com",
+      contact_phone: "555-1234",
+      review_url: null,
+    });
+    expect(calls).toContainEqual({ method: "eq", args: ["id", "biz-1"] });
+  });
+
+  it("omits fields not present in the patch", async () => {
+    const { db, calls } = fakeDb({ error: null });
+    await updateBusiness(db, "biz-1", { kbMd: "# kb" });
+    const update = calls.find((c) => c.method === "update");
+    expect(update?.args[0]).toEqual({ kb_md: "# kb" });
+  });
+});
+
+describe("getBusiness", () => {
+  it("maps snake_case business columns to the Business shape", async () => {
+    const row = {
+      id: "b1", name: "Pizza", review_url: null, kb_md: "", voice_md: "",
+      created_at: "2026-01-01", status: "active", contact_name: "Sam",
+      contact_email: null, contact_phone: "555-1234",
+    };
+    const { db } = fakeDb({ data: row });
+    expect(await getBusiness(db, "b1")).toEqual({
+      id: "b1", name: "Pizza", reviewUrl: null, kbMd: "", voiceMd: "",
+      createdAt: "2026-01-01", status: "active", contactName: "Sam",
+      contactEmail: null, contactPhone: "555-1234",
+    });
   });
 });

@@ -1,3 +1,5 @@
+import type { ClientStatus } from "../crm/status";
+
 export type Business = {
   id: string;
   name: string;
@@ -5,6 +7,10 @@ export type Business = {
   kbMd: string;
   voiceMd: string;
   createdAt: string;
+  status: ClientStatus;
+  contactName: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
 };
 
 export type ReviewStatus = "draft" | "posted";

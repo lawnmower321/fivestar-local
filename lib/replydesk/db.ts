@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Business, Review } from "./types";
+import type { ClientStatus } from "../crm/status";
 
 export function getDb(): SupabaseClient {
   const url = process.env.SUPABASE_URL;
@@ -13,6 +14,8 @@ function rowToBusiness(r: any): Business {
   return {
     id: r.id, name: r.name, reviewUrl: r.review_url,
     kbMd: r.kb_md, voiceMd: r.voice_md, createdAt: r.created_at,
+    status: r.status, contactName: r.contact_name,
+    contactEmail: r.contact_email, contactPhone: r.contact_phone,
   };
 }
 
@@ -53,13 +56,21 @@ export async function createBusiness(
 
 export async function updateBusiness(
   db: SupabaseClient, id: string,
-  patch: Partial<{ kbMd: string; voiceMd: string; name: string; reviewUrl: string | null }>,
+  patch: Partial<{
+    kbMd: string; voiceMd: string; name: string; reviewUrl: string | null;
+    status: ClientStatus; contactName: string | null;
+    contactEmail: string | null; contactPhone: string | null;
+  }>,
 ): Promise<void> {
   const row: Record<string, unknown> = {};
   if (patch.kbMd !== undefined) row.kb_md = patch.kbMd;
   if (patch.voiceMd !== undefined) row.voice_md = patch.voiceMd;
   if (patch.name !== undefined) row.name = patch.name;
   if (patch.reviewUrl !== undefined) row.review_url = patch.reviewUrl;
+  if (patch.status !== undefined) row.status = patch.status;
+  if (patch.contactName !== undefined) row.contact_name = patch.contactName;
+  if (patch.contactEmail !== undefined) row.contact_email = patch.contactEmail;
+  if (patch.contactPhone !== undefined) row.contact_phone = patch.contactPhone;
   const { error } = await db.from("businesses").update(row).eq("id", id);
   if (error) throw new Error(error.message);
 }
