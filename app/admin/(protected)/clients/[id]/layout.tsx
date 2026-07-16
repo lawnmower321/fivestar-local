@@ -1,4 +1,5 @@
-import { getDb, getBusiness } from "@/lib/replydesk/db";
+import { notFound } from "next/navigation";
+import { getDb, findBusiness } from "@/lib/replydesk/db";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { ClientTabs } from "@/components/admin/client-tabs";
 
@@ -12,7 +13,8 @@ export default async function ClientLayout({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const business = await getBusiness(getDb(), id);
+  const business = await findBusiness(getDb(), id);
+  if (!business) notFound();
   return (
     <div className="space-y-6">
       <div>

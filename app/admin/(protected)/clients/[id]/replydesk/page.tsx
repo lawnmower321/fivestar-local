@@ -1,4 +1,5 @@
-import { getDb, getBusiness, listReviews } from "@/lib/replydesk/db";
+import { notFound } from "next/navigation";
+import { getDb, findBusiness, listReviews } from "@/lib/replydesk/db";
 import { KbBuilder } from "@/components/admin/kb-builder";
 import { ReplyWorkspace } from "@/components/admin/reply-workspace";
 
@@ -12,7 +13,8 @@ export default async function ClientReplyDeskPage({
 }) {
   const { id } = await params;
   const db = getDb();
-  const business = await getBusiness(db, id);
+  const business = await findBusiness(db, id);
+  if (!business) notFound();
   // Show only POSTED rows in the Recent-reviews log. Every generate inserts a
   // `draft` audit row; those live only in the transient workspace card, so
   // filtering here keeps regenerations from cluttering the log. The DB insert

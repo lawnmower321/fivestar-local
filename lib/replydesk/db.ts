@@ -45,6 +45,16 @@ export async function getBusiness(db: SupabaseClient, id: string): Promise<Busin
   return rowToBusiness(must(data, error));
 }
 
+// Nullable variant of getBusiness: returns null on a missing row instead of
+// throwing, so route code can convert a miss to Next's notFound() (this file
+// never imports next/*, so it can't call notFound() itself). getBusiness is
+// kept for existing callers that want a throw-on-missing contract.
+export async function findBusiness(db: SupabaseClient, id: string): Promise<Business | null> {
+  const { data, error } = await db.from("businesses").select("*").eq("id", id).maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? rowToBusiness(data) : null;
+}
+
 export async function createBusiness(
   db: SupabaseClient, input: { name: string; reviewUrl?: string | null },
 ): Promise<Business> {

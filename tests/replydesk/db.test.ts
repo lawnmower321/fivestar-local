@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { deleteBusiness, countReviews, updateBusiness, getBusiness } from "@/lib/replydesk/db";
+import { deleteBusiness, countReviews, updateBusiness, getBusiness, findBusiness } from "@/lib/replydesk/db";
 
 type Call = { method: string; args: unknown[] };
 
@@ -12,7 +12,7 @@ function fakeDb(result: {
   const calls: Call[] = [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const builder: any = {};
-  for (const m of ["from", "delete", "select", "eq", "update", "single"]) {
+  for (const m of ["from", "delete", "select", "eq", "update", "single", "maybeSingle"]) {
     builder[m] = (...args: unknown[]) => {
       calls.push({ method: m, args });
       return builder;
@@ -104,5 +104,35 @@ describe("getBusiness", () => {
       createdAt: "2026-01-01", status: "active", contactName: "Sam",
       contactEmail: null, contactPhone: "555-1234",
     });
+  });
+});
+
+describe("findBusiness", () => {
+  it("maps snake_case business columns to the Business shape when found", async () => {
+    const row = {
+      id: "biz-1", name: "Joe's", review_url: null, kb_md: null, voice_md: null,
+      created_at: "2026-01-01", status: "lead", contact_name: null,
+      contact_email: null, contact_phone: null,
+    };
+    const { db, calls } = fakeDb({ data: row });
+    const result = await findBusiness(db, "biz-1");
+    expect(result).toEqual({
+      id: "biz-1", name: "Joe's", reviewUrl: null, kbMd: null, voiceMd: null,
+      createdAt: "2026-01-01", status: "lead", contactName: null,
+      contactEmail: null, contactPhone: null,
+    });
+    expect(calls).toContainEqual({ method: "from", args: ["businesses"] });
+    expect(calls).toContainEqual({ method: "eq", args: ["id", "biz-1"] });
+    expect(calls.some((c) => c.method === "maybeSingle")).toBe(true);
+  });
+
+  it("resolves to null when the row is missing, without throwing", async () => {
+    const { db } = fakeDb({ data: null });
+    await expect(findBusiness(db, "missing-id")).resolves.toBeNull();
+  });
+
+  it("throws the Supabase error message on failure", async () => {
+    const { db } = fakeDb({ error: { message: "boom" } });
+    await expect(findBusiness(db, "biz-1")).rejects.toThrow("boom");
   });
 });
