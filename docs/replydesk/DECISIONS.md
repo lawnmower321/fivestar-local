@@ -163,3 +163,21 @@ REPLYDESK_PASSCODE retires. All action inputs are now zod-parsed
 (app/admin/schemas.ts) immediately after requireUser(). The profiles table
 (migration 0002) holds display names for attribution; RLS on, zero policies
 (service-role access only), rows seeded manually while self-signup is off.
+
+## 2026-07-15 — Phase 2: CRM shell (clients, sidebar, tabbed record)
+businesses rows are now client records: status (lead|active|paused|churned,
+default lead, check-constrained; migration 0003) plus contact fields, edited
+on the client Overview tab (updateClientDetailsAction). Routes moved to
+/admin/clients with nested-route tabs (Overview | ReplyDesk — later phases
+add folders, not edits); /admin/businesses/:id 307-redirects via
+next.config.ts; /admin redirects to the client list until Phase 4's
+dashboard. Hard delete is now LEAD-ONLY, enforced server-side in
+deleteBusinessAction via lib/crm/status.canDeleteBusiness — non-leads are
+set to churned instead (record + history kept). Admin shell uses shadcn/ui
+(base-nova registry; sidebar/table/badge copied in) themed to existing
+tokens; marketing-shared files (ui/button, ui/accordion, globals.css)
+untouched. Bad/deleted client ids now render a friendly 404: a nullable
+findBusiness (.maybeSingle) lets route code call notFound(), caught by a
+boundary at app/admin/(protected)/clients/not-found.tsx — placed at the
+PARENT (not the [id]) segment because a segment's own not-found.js nests
+inside its layout and so cannot catch that layout's own guard throw.

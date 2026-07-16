@@ -16,12 +16,27 @@ MAP
   @supabase/ssr cookie adapter sets the session cookies, not the action). Lives
   OUTSIDE the (protected) route group so it renders without the guard and
   without a redirect loop.
-- (protected)/layout.tsx — auth guard + nav. A route group (no URL segment):
-  everything placed inside it requires a valid session; login/ is a sibling,
-  not a child, so it is never subject to this guard.
-- (protected)/page.tsx — business list + create (Task 6).
-- (protected)/businesses/[id]/ — KB builder + reply workspace (client
-  components in components/admin/) (Task 7/8).
+- (protected)/layout.tsx — auth guard + shadcn sidebar shell (AdminSidebar +
+  SidebarInset). A route group (no URL segment): everything placed inside it
+  requires a valid session; login/ is a sibling, not a child, so it is never
+  subject to this guard.
+- (protected)/page.tsx — interim redirect to /admin/clients (Phase 4 replaces
+  it with the today-dashboard).
+- (protected)/clients/page.tsx — client list: status filter chips, table,
+  add-client form.
+- (protected)/clients/[id]/layout.tsx — client header (name, status badge,
+  review link) + tab links (Overview | ReplyDesk).
+- (protected)/clients/[id]/page.tsx — Overview tab: details form + lead-only
+  danger zone (churned guidance for non-leads; server enforces the guard).
+- (protected)/clients/[id]/replydesk/page.tsx — KB builder + reply workspace
+  (client components in components/admin/).
+- (protected)/clients/not-found.tsx — "client not found" boundary for the
+  whole clients/[id] subtree. Placed at the parent segment (not [id]/) on
+  purpose: a segment's own not-found.js nests inside its layout, so a
+  notFound() thrown by clients/[id]/layout.tsx only bubbles to an ancestor
+  boundary. This one catches all three sites (layout + both tab pages).
+- Old /admin/businesses/:id URLs 307-redirect to /admin/clients/:id
+  (next.config.ts redirects()).
 
 See docs/replydesk/DECISIONS.md for why the guard lives in a route group
 instead of a single shared layout keyed on a request-path header.

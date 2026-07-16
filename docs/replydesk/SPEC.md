@@ -5,7 +5,7 @@ console where the two founders manage Google-review replies for customers.
 
 ## Who uses it
 The two founders only (v1). Built multi-tenant (per-business rows) so it can
-become customer-facing later. Access: one shared passcode.
+become customer-facing later. Access: individual founder accounts (Supabase Auth, email + password).
 
 ## Core loops
 1. **Knowledgebase builder** — per business, four input methods, all producing

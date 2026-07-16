@@ -11,8 +11,8 @@ INVARIANTS
   trusted to self-certify.
 
 MAP
-- types.ts — shared types (Business, Review, GateReport, GeneratedReply)
-- db.ts — Supabase factory + typed queries (service-role key, server-only)
+- types.ts — shared types (Business — incl. CRM status/contact fields typed via lib/crm/status —, Review, GateReport, GeneratedReply)
+- db.ts — Supabase factory + typed queries (service-role key, server-only). getBusiness throws on a missing row; findBusiness returns null instead, so route code can map null → notFound() (lib stays next-free — the route layer owns notFound()).
 - kb-sections.ts — pure markdown-section merge/extract (founder-authored
   recovery section survives KB rebuilds)
 - gates/ — reply quality gates (see gates/CLAUDE.md)

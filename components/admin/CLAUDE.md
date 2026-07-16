@@ -12,3 +12,14 @@ MAP
 - reply-workspace.tsx — paste review → generate → gate verdict → copy →
   mark posted. Gate verdicts come from the server; this component only
   renders them (hardFail = red, never copy-ready; soft flags = amber).
+- delete-business.tsx — type-the-name hard delete danger zone. Lead-only:
+  the Overview page hides it for non-leads and deleteBusinessAction refuses
+  them server-side.
+- admin-sidebar.tsx — shadcn sidebar nav (Clients + logout); active state
+  via usePathname. New entries appear as phases ship.
+- status-badge.tsx — ClientStatus → themed Badge; the single source of
+  status badge classes (list rows + client-record header).
+- client-tabs.tsx — Overview/ReplyDesk tab links for the client record;
+  active by exact pathname match.
+- client-details-form.tsx — status select + contact/review-link fields;
+  calls updateClientDetailsAction, renders its {error} inline.
