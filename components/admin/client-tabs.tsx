@@ -21,6 +21,7 @@ export function ClientTabs({ clientId }: { clientId: string }) {
           <Link
             key={t.label}
             href={href}
+            aria-current={active ? "page" : undefined}
             className={
               active
                 ? "-mb-px border-b-2 border-gblue px-4 py-2 text-sm font-medium text-gblue"
