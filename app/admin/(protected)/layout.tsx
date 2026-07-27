@@ -4,6 +4,8 @@ import { userFromClaims } from "@/lib/auth/claims";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await getAuthClient();
   const { data } = await supabase.auth.getClaims();
