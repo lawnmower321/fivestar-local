@@ -6,11 +6,19 @@
 // 2. When your Stripe payment links exist, paste them into pricing.tiers[].href
 //    below (they currently fall back to mailto).
 // 3. After the first real install, add the case study numbers to `proof`.
+// 4. Set site.reviewUrl to your real Google review link — the hero demo will
+//    then show an "open the real thing" link at the end of the simulation.
+// 5. PLANNED: "Meet the team" section — photo of each founder + 2-sentence
+//    bios (who you are, why you started this, that you install in person).
+//    Expand the `team` block below into { title, body, members: [{ name,
+//    role, photo, bio }] } once headshots exist.
 
 export const content = {
   site: {
     name: "FiveStar Local",
     email: "hello@fivestarlocal.pro",
+    // Your real Google review link (e.g. https://g.page/r/XXXX/review). null hides it.
+    reviewUrl: null as string | null,
   },
   nav: [
     { label: "How it works", href: "#how-it-works" },
@@ -26,6 +34,16 @@ export const content = {
       "A small card on your counter. Your customer taps it with their phone, your Google review page opens, and the review happens before they're out the door. We come to you and set the whole thing up while you watch.",
     cta: "See pricing",
     ctaSecondary: "See how it works",
+    tapHint: "Try it — click the card",
+  },
+  // The simulated review that plays when someone clicks the hero card
+  demo: {
+    author: "You",
+    posting: "Posting publicly across Google",
+    reviewText: "Tapped the card at the counter and I was done in fifteen seconds. Easiest review I've ever left.",
+    posted: "Review posted",
+    note: "This one's a demo — a real card opens your business's actual Google review page.",
+    realLink: "Open our real review page",
   },
   steps: [
     {
@@ -65,6 +83,26 @@ export const content = {
       "Review replies written for you within 48 hours (Growth plan)",
       "A monthly report: new reviews, rating trend, where you rank (Growth plan)",
     ],
+  },
+  // Dropbox-style split: what winning the local search actually looks like
+  reviewShowcase: {
+    eyebrow: "Why reviews",
+    title: "Your Google rating is your storefront",
+    body: "Nearly 9 in 10 customers check Google reviews before choosing a local business — and most never look past the top result. A steady stream of fresh five-star reviews is what puts you there.",
+    points: [
+      "Rank higher in “near me” searches on Google Maps",
+      "Win the customer before they ever compare you to anyone",
+      "Recent reviews beat a big number from three years ago",
+    ],
+    cta: "See pricing",
+    search: {
+      query: "bakery near me",
+      results: [
+        { name: "Bella's Bakery", rating: "4.9", reviews: 212, meta: "Bakery · Open now", top: true },
+        { name: "Corner Bakehouse", rating: "4.1", reviews: 37, meta: "Bakery · Closes 5 PM", top: false },
+        { name: "Daily Loaf Co.", rating: "3.9", reviews: 18, meta: "Bakery · Closes 4 PM", top: false },
+      ],
+    },
   },
   pricing: {
     title: "Two ways to start",
@@ -106,6 +144,7 @@ export const content = {
     ],
     finePrint: "Setup happens at your business — we come to you.",
   },
+  // TODO #5 above: grow this into the full "Meet the team" section with photos
   team: {
     title: "Run by two people you'll actually meet",
     body: "FiveStar Local is a two-person local operation. We program every card ourselves, walk it into your business, and answer our own email. If something breaks, you talk to the people who set it up — not a ticket queue.",

@@ -4,6 +4,7 @@ import { Hero } from "@/components/site/hero";
 import { HowItWorks } from "@/components/site/how-it-works";
 import { ScanShowcase } from "@/components/site/scan-showcase";
 import { WhatYouGet } from "@/components/site/benefits";
+import { ReviewShowcase } from "@/components/site/review-showcase";
 import { Pricing } from "@/components/site/pricing";
 import { TeamNote } from "@/components/site/team-note";
 import { Faq } from "@/components/site/faq";
@@ -18,6 +19,7 @@ export default function Home() {
         <HowItWorks />
         <ScanShowcase />
         <WhatYouGet />
+        <ReviewShowcase />
         <Pricing />
         <TeamNote />
         <Faq />
