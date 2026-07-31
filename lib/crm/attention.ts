@@ -20,17 +20,21 @@ export function buildAttention(
   now: Date,
   staleDays: number = STALE_DAYS,
 ): AttentionItem[] {
-  const cutoff = new Date(now.getTime() - staleDays * 86_400_000).toISOString();
+  const cutoffMs = now.getTime() - staleDays * 86_400_000;
   return clients.flatMap((c) => {
     const mine = reviews.filter((r) => r.businessId === c.id);
     const reasons: string[] = [];
     const latest = mine.reduce<ReviewMeta | null>(
-      (best, r) => (!best || r.createdAt > best.createdAt ? r : best), null,
+      (best, r) => (!best || new Date(r.createdAt).getTime() > new Date(best.createdAt).getTime() ? r : best), null,
     );
     if (latest?.status === "draft") reasons.push("Latest reply draft was never posted");
-    const lastPosted = mine.map((r) => r.postedAt).filter((p): p is string => p !== null).sort().at(-1) ?? null;
+    const lastPosted = mine
+      .map((r) => r.postedAt)
+      .filter((p): p is string => p !== null)
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+      .at(-1) ?? null;
     if (lastPosted === null) reasons.push("No reply ever posted");
-    else if (lastPosted < cutoff) reasons.push(`No reply posted in ${staleDays}+ days`);
+    else if (new Date(lastPosted).getTime() < cutoffMs) reasons.push(`No reply posted in ${staleDays}+ days`);
     return reasons.length > 0 ? [{ businessId: c.id, businessName: c.name, reasons }] : [];
   });
 }

@@ -21,7 +21,7 @@ describe("buildAttention", () => {
     ];
     const out = buildAttention([joes], reviews, NOW);
     expect(out).toHaveLength(1);
-    expect(out[0].reasons).toContain("Latest reply draft was never posted");
+    expect(out[0].reasons).toEqual(["Latest reply draft was never posted"]);
   });
 
   it("does not flag drafts that were superseded by a posted reply", () => {
@@ -60,5 +60,17 @@ describe("buildAttention", () => {
     const other = [meta({ businessId: "b2", status: "draft", postedAt: null })];
     const out = buildAttention([joes], other, NOW);
     expect(out[0].reasons).toEqual(["No reply ever posted"]);
+  });
+
+  it("handles PostgREST timestamp format (+00:00) correctly", () => {
+    // PostgREST returns timestamps with +00:00 suffix, not .000Z. Verify epoch-based
+    // comparison handles mixed formats: recent +00:00 is NOT stale, old +00:00 IS stale.
+    const recentPostgREST = [meta({ postedAt: "2026-07-29T18:00:00+00:00" })];
+    expect(buildAttention([joes], recentPostgREST, NOW)).toEqual([]);
+
+    const oldPostgREST = [meta({ postedAt: "2026-07-01T12:00:00+00:00" })];
+    expect(buildAttention([joes], oldPostgREST, NOW)[0].reasons).toEqual([
+      "No reply posted in 7+ days",
+    ]);
   });
 });
