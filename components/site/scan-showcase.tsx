@@ -120,7 +120,6 @@ export function ScanShowcase() {
                 <motion.div
                   animate={{
                     x: `${pos * SPACING}%`,
-                    y: dist * 6,
                     scale: pos === 0 ? 1.08 : dist === 1 ? 0.96 : 0.9,
                     opacity: isWrapping ? 0 : dist === 2 ? 0.4 : dist === 1 ? 0.8 : 1,
                   }}
@@ -151,15 +150,15 @@ export function ScanShowcase() {
             </div>
             {/* transparent scan window — cards pass behind this */}
             <div className="relative h-40 overflow-hidden border-x border-slate-200/60 sm:h-44">
-              {/* corner brackets flash when a new card locks in */}
+              {/* corner brackets flash when a new card locks in — sized to the active card, not the whole window */}
               <motion.div
                 key={`brackets-${active}`}
                 initial={reduce ? false : { opacity: 0.35 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: SLIDE_S * 0.7 }}
-                className="absolute inset-0"
+                className="absolute left-1/2 top-1/2 h-28 w-44 -translate-x-1/2 -translate-y-1/2 sm:h-36 sm:w-56"
               >
-                {["left-3 top-2 border-l-2 border-t-2 rounded-tl-lg", "right-3 top-2 border-r-2 border-t-2 rounded-tr-lg", "left-3 bottom-2 border-b-2 border-l-2 rounded-bl-lg", "right-3 bottom-2 border-b-2 border-r-2 rounded-br-lg"].map((c) => (
+                {["-left-1 -top-1 border-l-2 border-t-2 rounded-tl-lg", "-right-1 -top-1 border-r-2 border-t-2 rounded-tr-lg", "-left-1 -bottom-1 border-b-2 border-l-2 rounded-bl-lg", "-right-1 -bottom-1 border-b-2 border-r-2 rounded-br-lg"].map((c) => (
                   <span key={c} className={`absolute h-6 w-6 border-gblue ${c}`} />
                 ))}
               </motion.div>
@@ -167,10 +166,10 @@ export function ScanShowcase() {
               {!reduce && (
                 <motion.div
                   key={`beam-${active}`}
-                  initial={{ top: "8%", opacity: 0 }}
-                  animate={{ top: ["8%", "88%"], opacity: [0, 0.9, 0] }}
+                  initial={{ y: 13, opacity: 0 }}
+                  animate={{ y: [13, 141], opacity: [0, 0.9, 0] }}
                   transition={{ duration: 0.8, delay: SLIDE_S * 0.85, ease: "easeInOut" }}
-                  className="absolute inset-x-5 h-px bg-gradient-to-r from-transparent via-gblue to-transparent"
+                  className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-gblue to-transparent"
                   aria-hidden
                 />
               )}

@@ -11,28 +11,35 @@ type Stage = "stars" | "typing" | "posted";
 const STAR_MS = 260;
 const TYPE_MS = 24;
 
-/** Concentric NFC ripple field — the tap gesture, drawn as thin rings */
+/**
+ * Concentric NFC field lines — radii are set relative to the card's own
+ * footprint (320×202px max), not arbitrary: the innermost ring sits mostly
+ * behind the card, each step out clears a little more of it, and the
+ * outermost ring shares its radius with the pulsing arc below so the
+ * "broadcast" reads as riding the edge of the field rather than a
+ * coincidence.
+ */
 function RippleField() {
   return (
     <svg
-      className="pointer-events-none absolute left-1/2 top-1/2 h-[720px] w-[720px] -translate-x-1/2 -translate-y-1/2 text-slate-200"
-      viewBox="0 0 720 720"
+      className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 text-slate-300"
+      viewBox="0 0 500 500"
       fill="none"
       aria-hidden
     >
-      {[120, 190, 260, 330].map((r) => (
-        <circle key={r} cx="360" cy="360" r={r} stroke="currentColor" strokeWidth="1" />
+      {[140, 180, 215].map((r) => (
+        <circle key={r} cx="250" cy="250" r={r} stroke="currentColor" strokeWidth="1.25" />
       ))}
-      {/* one blue arc — the tap, mid-broadcast */}
+      {/* one blue arc — the tap, mid-broadcast, riding the outermost ring */}
       <circle
         className="ring-pulse"
-        cx="360"
-        cy="360"
-        r={225}
+        cx="250"
+        cy="250"
+        r={215}
         stroke="#4285f4"
-        strokeWidth="1.5"
-        strokeDasharray="140 1274"
-        strokeDashoffset="-160"
+        strokeWidth="1.75"
+        strokeDasharray="134 1218"
+        strokeDashoffset="-153"
         strokeLinecap="round"
       />
     </svg>
@@ -87,14 +94,22 @@ export function TapDemo() {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative">
-        <RippleField />
+      <div className="relative isolate">
+        {/* the field: absolutely positioned so it never claims layout space
+            of its own — it can only ever decay into whitespace the card
+            already has, never push later content down */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[460px] w-[460px] -translate-x-1/2 -translate-y-1/2 overflow-hidden"
+        >
+          <RippleField />
+        </div>
         <button
           type="button"
           onClick={toggle}
           aria-expanded={open}
           aria-controls="tap-demo-panel"
-          className="group relative block cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-gblue focus-visible:ring-offset-4"
+          className="group relative z-10 block cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-gblue focus-visible:ring-offset-4"
         >
           <NfcCard />
         </button>

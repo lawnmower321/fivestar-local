@@ -1,7 +1,13 @@
+"use client";
+
+import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { Check, CheckCircle2, MapPin, Search, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/site/reveal";
 import { content } from "@/lib/content";
+
+type SearchResult = (typeof content.reviewShowcase.search.results)[number];
 
 function StarRow({ rating, size = 11, muted = false }: { rating: string; size?: number; muted?: boolean }) {
   const full = Math.round(parseFloat(rating));
@@ -25,7 +31,13 @@ function StarRow({ rating, size = 11, muted = false }: { rating: string; size?: 
 }
 
 /** Mac-style browser window showing the local search your business wins */
-function BrowserMock() {
+function BrowserMock({
+  active,
+  onSelect,
+}: {
+  active: number;
+  onSelect: (i: number) => void;
+}) {
   const { query, results } = content.reviewShowcase.search;
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10">
@@ -48,43 +60,48 @@ function BrowserMock() {
           Local results · &ldquo;{query}&rdquo;
         </p>
         <div className="mt-3 space-y-2">
-          {results.map((r) => (
-            <div
-              key={r.name}
-              className={
-                r.top
-                  ? "rounded-xl border border-gblue/30 bg-gblue/5 px-4 py-3"
-                  : "rounded-xl border border-slate-100 px-4 py-3 opacity-70"
-              }
-            >
-              <div className="flex items-center justify-between gap-2">
-                <p className={`text-sm font-semibold ${r.top ? "text-slate-900" : "text-slate-600"}`}>
-                  {r.name}
-                </p>
-                {r.top && (
-                  <span className="rounded-full bg-gblue px-2 py-0.5 text-[10px] font-semibold text-white">
-                    Top result
-                  </span>
-                )}
-              </div>
-              <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
-                <span className={`font-semibold ${r.top ? "text-slate-700" : ""}`}>{r.rating}</span>
-                <StarRow rating={r.rating} muted={!r.top} />
-                <span>({r.reviews})</span>
-                <span aria-hidden>·</span>
-                <span>{r.meta}</span>
-              </div>
-            </div>
-          ))}
+          {results.map((r, i) => {
+            const isActive = i === active;
+            return (
+              <button
+                key={r.name}
+                type="button"
+                onClick={() => onSelect(i)}
+                aria-pressed={isActive}
+                className={
+                  isActive
+                    ? "w-full cursor-pointer rounded-xl border border-gblue/30 bg-gblue/5 px-4 py-3 text-left transition-colors"
+                    : "w-full cursor-pointer rounded-xl border border-slate-100 px-4 py-3 text-left opacity-70 transition-colors hover:border-slate-200 hover:opacity-100"
+                }
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className={`text-sm font-semibold ${isActive ? "text-slate-900" : "text-slate-600"}`}>
+                    {r.name}
+                  </p>
+                  {r.top && (
+                    <span className="rounded-full bg-gblue px-2 py-0.5 text-[10px] font-semibold text-white">
+                      Top result
+                    </span>
+                  )}
+                </div>
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
+                  <span className={`font-semibold ${isActive ? "text-slate-700" : ""}`}>{r.rating}</span>
+                  <StarRow rating={r.rating} muted={!isActive} />
+                  <span>({r.reviews})</span>
+                  <span aria-hidden>·</span>
+                  <span>{r.meta}</span>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 }
 
-/** iPhone-style frame with the finished five-star review */
-function PhoneMock() {
-  const winner = content.reviewShowcase.search.results[0];
+/** iPhone-style frame with the selected result's review, mid-post */
+function PhoneMock({ business }: { business: SearchResult }) {
   return (
     <div className="w-44 rounded-[1.8rem] border border-slate-200 bg-white p-3 shadow-2xl shadow-slate-900/25 sm:w-52">
       <div className="flex items-center justify-between px-1 text-[9px] font-medium text-slate-500">
@@ -92,27 +109,39 @@ function PhoneMock() {
         <span className="h-1 w-10 rounded-full bg-slate-200" />
         <span>100%</span>
       </div>
-      <div className="mt-2.5 rounded-xl bg-slate-50 p-3">
-        <p className="text-xs font-bold text-slate-900">{winner.name}</p>
-        <p className="text-[10px] text-slate-500">Rate &amp; review</p>
-        <div className="mt-2">
-          <StarRow rating="5" size={16} />
-        </div>
-        <div className="mt-2.5 space-y-1.5" aria-hidden>
-          <div className="h-1.5 w-full rounded bg-slate-200" />
-          <div className="h-1.5 w-4/5 rounded bg-slate-200" />
-          <div className="h-1.5 w-3/5 rounded bg-slate-200" />
-        </div>
-        <div className="mt-3 flex items-center gap-1.5 rounded-lg border border-ggreen/30 bg-ggreen/5 px-2 py-1.5 text-[10px] font-medium text-ggreen">
-          <CheckCircle2 size={11} className="shrink-0" />
-          Review posted
-        </div>
-      </div>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={business.name}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="mt-2.5 rounded-xl bg-slate-50 p-3"
+        >
+          <p className="text-xs font-bold text-slate-900">{business.name}</p>
+          <p className="text-[10px] text-slate-500">Rate &amp; review</p>
+          <div className="mt-2">
+            <StarRow rating="5" size={16} />
+          </div>
+          <div className="mt-2.5 space-y-1.5" aria-hidden>
+            <div className="h-1.5 w-full rounded bg-slate-200" />
+            <div className="h-1.5 w-4/5 rounded bg-slate-200" />
+            <div className="h-1.5 w-3/5 rounded bg-slate-200" />
+          </div>
+          <div className="mt-3 flex items-center gap-1.5 rounded-lg border border-ggreen/30 bg-ggreen/5 px-2 py-1.5 text-[10px] font-medium text-ggreen">
+            <CheckCircle2 size={11} className="shrink-0" />
+            Review posted
+          </div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
 
 export function ReviewShowcase() {
+  const [active, setActive] = useState(0);
+  const results = content.reviewShowcase.search.results;
+
   return (
     <section className="overflow-hidden bg-white py-24">
       <div className="mx-auto grid max-w-6xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-[5fr_6fr]">
@@ -145,9 +174,9 @@ export function ReviewShowcase() {
         </Reveal>
 
         <Reveal delay={0.15} className="relative pb-14 pr-6 sm:pr-10">
-          <BrowserMock />
+          <BrowserMock active={active} onSelect={setActive} />
           <div className="absolute -bottom-2 right-0 rotate-3">
-            <PhoneMock />
+            <PhoneMock business={results[active]} />
           </div>
         </Reveal>
       </div>
