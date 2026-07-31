@@ -61,7 +61,7 @@ export default async function ReplyDeskDashboard() {
                     "Unknown client"
                   )}
                   {" · "}
-                  <span aria-label={`${review.rating} stars`}>
+                  <span role="img" aria-label={`${review.rating} stars`}>
                     <span aria-hidden="true">{"★".repeat(review.rating)}</span>
                   </span>
                   {review.reviewer && ` · ${review.reviewer}`}
