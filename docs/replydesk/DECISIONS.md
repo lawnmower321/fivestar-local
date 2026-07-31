@@ -224,3 +224,13 @@ helpers agree and a renderer can't mistake an empty string for real data;
 and due dates render via the new lib/crm/dates.formatDueDate (string-part
 parsing, not `new Date(str).toLocaleDateString()`, which would reintroduce
 the UTC-shift bug this file exists to prevent).
+
+## 2026-07-31 — Phase 5: ReplyDesk cross-client dashboard
+/admin/replydesk = recent posted replies (20, joined business names) +
+"needs attention" for ACTIVE clients only: latest review row is an unposted
+draft, and/or no posted reply in 7+ days / ever (signals + window
+user-approved 2026-07-31). The draft signal reads only the latest row per
+client because draft rows are an accumulating audit trail (regenerations).
+Heuristic is pure (lib/crm/attention.buildAttention); review readers live in
+lib/replydesk/db (reviews are ReplyDesk domain). Read-only page — no new
+actions.

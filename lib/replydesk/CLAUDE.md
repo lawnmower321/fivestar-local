@@ -12,7 +12,7 @@ INVARIANTS
 
 MAP
 - types.ts — shared types (Business — incl. CRM status/contact fields typed via lib/crm/status —, Review, GateReport, GeneratedReply)
-- db.ts — Supabase factory + typed queries (service-role key, server-only). getBusiness throws on a missing row; findBusiness returns null instead, so route code can map null → notFound() (lib stays next-free — the route layer owns notFound()).
+- db.ts — Supabase factory + typed queries (service-role key, server-only). getBusiness throws on a missing row; findBusiness returns null instead, so route code can map null → notFound() (lib stays next-free — the route layer owns notFound()). recentPostedAcrossClients(db, limit=20) and listReviewMeta(db, businessIds) back the cross-client ReplyDesk dashboard (listReviewMeta returns [] without querying on an empty id list).
 - kb-sections.ts — pure markdown-section merge/extract (founder-authored
   recovery section survives KB rebuilds)
 - gates/ — reply quality gates (see gates/CLAUDE.md)

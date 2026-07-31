@@ -8,6 +8,11 @@ INVARIANTS
 - All "today"/"overdue" comparisons go through todayInTimeZone(FOUNDER_TZ)
   (dates.ts) — never `new Date().toISOString().slice(0,10)`, which flips at
   UTC midnight instead of America/New_York.
+- Timestamp comparisons (attention.ts) go through epoch ms
+  (`new Date(x).getTime()`), never string comparison: PostgREST serializes
+  `timestamptz` as `"...+00:00"` while `toISOString()` produces `"...000Z"` —
+  equal instants, unequal strings, so a naive `<` on the raw strings
+  misclassifies boundary cases.
 
 MAP
 - status.ts — client status enum (STATUSES, ClientStatus), isClientStatus,
@@ -31,5 +36,9 @@ MAP
 - tasks.ts — TaskBuckets, bucketTasks: one overdue/today/upcoming/anytime/done
   bucketing rule shared by the client tab, /admin/tasks, and the dashboard.
 - timeline.ts — activityLabel: one-line display text per activity.
+- attention.ts — STALE_DAYS (7), ReviewMeta, buildAttention(clients, reviews,
+  now, staleDays?): pure "needs attention" heuristic (latest review row is an
+  unposted draft, and/or no posted reply in staleDays+ days / ever); callers
+  pass ACTIVE clients only.
 
 TESTS: tests/crm/
