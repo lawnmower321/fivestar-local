@@ -103,6 +103,26 @@ describe("createTask", () => {
   });
 });
 
+describe("listTasksForBusiness", () => {
+  it("queries newest-first for the business and maps rows", async () => {
+    const row = {
+      id: "t1", business_id: "biz-1", assignee: "u1", title: "Send invoice",
+      due_date: "2026-08-01", status: "open", created_by: "u1",
+      created_at: "2026-07-31T12:00:00Z", completed_at: null,
+    };
+    const { db, calls } = fakeDb({ data: [row] });
+    const out = await listTasksForBusiness(db, "biz-1");
+    expect(out).toEqual([{
+      id: "t1", businessId: "biz-1", assignee: "u1", title: "Send invoice",
+      dueDate: "2026-08-01", status: "open", createdBy: "u1",
+      createdAt: "2026-07-31T12:00:00Z", completedAt: null,
+    }]);
+    expect(calls).toContainEqual({ method: "from", args: ["tasks"] });
+    expect(calls).toContainEqual({ method: "eq", args: ["business_id", "biz-1"] });
+    expect(calls).toContainEqual({ method: "order", args: ["created_at", { ascending: false }] });
+  });
+});
+
 describe("completeTask", () => {
   it("updates status+completed_at and returns the mapped row", async () => {
     const row = {
@@ -118,6 +138,11 @@ describe("completeTask", () => {
     expect(calls).toContainEqual({ method: "eq", args: ["id", "t1"] });
     expect(out.businessId).toBe("biz-1");
     expect(out.title).toBe("Send invoice");
+  });
+
+  it("throws the Supabase error message instead of silently no-oping", async () => {
+    const { db } = fakeDb({ error: { message: "update boom" } });
+    await expect(completeTask(db, "t1")).rejects.toThrow("update boom");
   });
 });
 
