@@ -3,7 +3,7 @@ import {
   loginSchema, createBusinessSchema, generateReplySchema,
   markPostedSchema, buildKbFromUrlSchema, buildKbFromTextSchema,
   saveKbSchema, saveVoiceSchema, extractVoiceSchema, deleteBusinessSchema,
-  updateClientSchema,
+  updateClientSchema, addNoteSchema, deleteNoteSchema,
 } from "@/app/admin/schemas";
 
 const UUID = "a2f7c1de-3b44-4e6f-9a10-8a2f1c3d4e5f";
@@ -150,5 +150,26 @@ describe("updateClientSchema", () => {
   });
   it("rejects a non-uuid businessId", () => {
     expect(updateClientSchema.safeParse({ ...base, businessId: "nope" }).success).toBe(false);
+  });
+});
+
+describe("addNoteSchema", () => {
+  it("trims the body and requires non-empty", () => {
+    const out = addNoteSchema.parse({
+      businessId: "6f9619ff-8b86-4d01-b42d-00cf4fc964ff", body: "  called them  ",
+    });
+    expect(out.body).toBe("called them");
+    expect(() => addNoteSchema.parse({
+      businessId: "6f9619ff-8b86-4d01-b42d-00cf4fc964ff", body: "   ",
+    })).toThrow();
+  });
+  it("rejects a non-uuid businessId", () => {
+    expect(() => addNoteSchema.parse({ businessId: "nope", body: "x" })).toThrow();
+  });
+});
+
+describe("deleteNoteSchema", () => {
+  it("requires uuids for both ids", () => {
+    expect(() => deleteNoteSchema.parse({ activityId: "nope", businessId: "nope" })).toThrow();
   });
 });

@@ -46,3 +46,13 @@ export const updateClientSchema = z.object({
   contactPhone: optionalTrimmed,
   reviewUrl: z.string().trim().transform((s) => (HTTP_URL_RE.test(s) ? s : null)),
 });
+
+export const addNoteSchema = z.object({
+  businessId: z.uuid(),
+  body: z.string().trim().min(1),
+});
+
+export const deleteNoteSchema = z.object({
+  activityId: z.uuid(),
+  businessId: z.uuid(),
+});
