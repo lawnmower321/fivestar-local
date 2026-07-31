@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Business, Review } from "./types";
 import type { ClientStatus } from "../crm/status";
+import type { ReviewMeta } from "../crm/attention";
 
 export function getDb(): SupabaseClient {
   const url = process.env.SUPABASE_URL;
@@ -133,4 +134,29 @@ export async function countReviews(db: SupabaseClient, businessId: string): Prom
     .select("*", { count: "exact", head: true }).eq("business_id", businessId);
   if (error) throw new Error(error.message);
   return count ?? 0;
+}
+
+export async function recentPostedAcrossClients(
+  db: SupabaseClient, limit = 20,
+): Promise<{ review: Review; businessName: string }[]> {
+  const { data, error } = await db.from("reviews").select("*, businesses(name)")
+    .eq("status", "posted").order("posted_at", { ascending: false }).limit(limit);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return must(data, error).map((r: any) => ({
+    review: rowToReview(r), businessName: r.businesses?.name ?? "",
+  }));
+}
+
+export async function listReviewMeta(
+  db: SupabaseClient, businessIds: string[],
+): Promise<ReviewMeta[]> {
+  if (businessIds.length === 0) return [];
+  const { data, error } = await db.from("reviews")
+    .select("business_id, status, created_at, posted_at")
+    .in("business_id", businessIds);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return must(data, error).map((r: any) => ({
+    businessId: r.business_id, status: r.status,
+    createdAt: r.created_at, postedAt: r.posted_at,
+  }));
 }

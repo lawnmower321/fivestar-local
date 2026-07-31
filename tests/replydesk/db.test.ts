@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { deleteBusiness, countReviews, updateBusiness, getBusiness, findBusiness } from "@/lib/replydesk/db";
+import {
+  deleteBusiness, countReviews, updateBusiness, getBusiness, findBusiness,
+  recentPostedAcrossClients, listReviewMeta,
+} from "@/lib/replydesk/db";
 
 type Call = { method: string; args: unknown[] };
 
@@ -12,7 +15,10 @@ function fakeDb(result: {
   const calls: Call[] = [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const builder: any = {};
-  for (const m of ["from", "delete", "select", "eq", "update", "single", "maybeSingle"]) {
+  for (const m of [
+    "from", "delete", "select", "eq", "update", "single", "maybeSingle",
+    "in", "not", "order", "limit", "insert",
+  ]) {
     builder[m] = (...args: unknown[]) => {
       calls.push({ method: m, args });
       return builder;
@@ -134,5 +140,39 @@ describe("findBusiness", () => {
   it("throws the Supabase error message on failure", async () => {
     const { db } = fakeDb({ error: { message: "boom" } });
     await expect(findBusiness(db, "biz-1")).rejects.toThrow("boom");
+  });
+});
+
+describe("recentPostedAcrossClients", () => {
+  it("joins the business name and filters to posted", async () => {
+    const rows = [{
+      id: "r1", business_id: "b1", rating: 5, reviewer: "Ann", review_text: "great",
+      reply_text: "thanks", detail_referenced: null, similarity: 0.1, flags: [],
+      status: "posted", created_at: "2026-07-30T00:00:00Z",
+      posted_at: "2026-07-30T01:00:00Z", businesses: { name: "Joe's" },
+    }];
+    const { db, calls } = fakeDb({ data: rows });
+    const out = await recentPostedAcrossClients(db);
+    expect(out[0].businessName).toBe("Joe's");
+    expect(out[0].review.id).toBe("r1");
+    expect(calls).toContainEqual({ method: "eq", args: ["status", "posted"] });
+    expect(calls).toContainEqual({ method: "order", args: ["posted_at", { ascending: false }] });
+    expect(calls).toContainEqual({ method: "limit", args: [20] });
+  });
+});
+
+describe("listReviewMeta", () => {
+  it("returns [] for an empty id list without querying", async () => {
+    const { db, calls } = fakeDb({ data: [] });
+    expect(await listReviewMeta(db, [])).toEqual([]);
+    expect(calls).toHaveLength(0);
+  });
+  it("maps rows and scopes to the given business ids", async () => {
+    const rows = [{ business_id: "b1", status: "draft", created_at: "2026-07-30T00:00:00Z", posted_at: null }];
+    const { db, calls } = fakeDb({ data: rows });
+    expect(await listReviewMeta(db, ["b1", "b2"])).toEqual([
+      { businessId: "b1", status: "draft", createdAt: "2026-07-30T00:00:00Z", postedAt: null },
+    ]);
+    expect(calls).toContainEqual({ method: "in", args: ["business_id", ["b1", "b2"]] });
   });
 });
