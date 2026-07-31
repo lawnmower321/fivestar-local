@@ -38,14 +38,16 @@ export async function listActivities(
 }
 
 // The type filter in the query itself makes non-note deletion impossible at
-// the db layer — not merely hidden in the UI.
-export async function deleteNoteActivity(db: SupabaseClient, id: string): Promise<void> {
+// the db layer — not merely hidden in the UI. The business_id filter makes a
+// mismatched (id, businessId) pair a no-op instead of deleting a note that
+// belongs to a different client.
+export async function deleteNoteActivity(db: SupabaseClient, id: string, businessId: string): Promise<void> {
   const { error } = await db.from("activities").delete()
-    .eq("id", id).eq("type", "note");
+    .eq("id", id).eq("type", "note").eq("business_id", businessId);
   if (error) throw new Error(error.message);
 }
 
 export async function listProfiles(db: SupabaseClient): Promise<Profile[]> {
-  const { data, error } = await db.from("profiles").select("*");
+  const { data, error } = await db.from("profiles").select("id, display_name");
   return must(data, error).map((r) => ({ id: r.id, displayName: r.display_name }));
 }

@@ -1,10 +1,22 @@
+import { StickyNote, MessageSquare, ArrowRightLeft, BookOpen, CheckCircle2 } from "lucide-react";
 import { getDb } from "@/lib/replydesk/db";
 import { listActivities, listProfiles } from "@/lib/crm/db";
 import { activityLabel } from "@/lib/crm/timeline";
+import type { ActivityType } from "@/lib/crm/types";
 import { NoteComposer } from "@/components/admin/note-composer";
 import { DeleteNoteButton } from "@/components/admin/delete-note-button";
 
 export const dynamic = "force-dynamic";
+
+// One muted icon per activity type — a note whose text happens to read like
+// a system event (e.g. "Posted a review reply") stays visually distinct.
+const ACTIVITY_ICONS: Record<ActivityType, typeof StickyNote> = {
+  note: StickyNote,
+  reply_posted: MessageSquare,
+  status_change: ArrowRightLeft,
+  kb_updated: BookOpen,
+  task_completed: CheckCircle2,
+};
 
 export default async function TimelinePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -18,19 +30,25 @@ export default async function TimelinePage({ params }: { params: Promise<{ id: s
         <p className="text-sm text-slate-500">No activity yet — notes, posted replies, KB saves, and status changes will show up here.</p>
       ) : (
         <ul className="space-y-2">
-          {activities.map((a) => (
-            <li key={a.id} className="flex items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
-              <div>
-                <p className="text-sm text-slate-800">{activityLabel(a)}</p>
-                <p className="mt-0.5 text-xs text-slate-400">
-                  {a.userId ? (nameOf.get(a.userId) ?? "Former user") : "Former user"}
-                  {" · "}
-                  {new Date(a.createdAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "America/New_York" })}
-                </p>
-              </div>
-              {a.type === "note" && <DeleteNoteButton activityId={a.id} businessId={id} />}
-            </li>
-          ))}
+          {activities.map((a) => {
+            const Icon = ACTIVITY_ICONS[a.type];
+            return (
+              <li key={a.id} className="flex items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+                <div className="flex min-w-0 items-start gap-2">
+                  <Icon className="mt-0.5 size-4 shrink-0 text-slate-400" aria-hidden="true" />
+                  <div className="min-w-0 break-words">
+                    <p className="whitespace-pre-wrap break-words text-sm text-slate-800">{activityLabel(a)}</p>
+                    <p className="mt-0.5 text-xs text-slate-400">
+                      {a.userId ? (nameOf.get(a.userId) ?? "Former user") : "Former user"}
+                      {" · "}
+                      {new Date(a.createdAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "America/New_York" })}
+                    </p>
+                  </div>
+                </div>
+                {a.type === "note" && <DeleteNoteButton activityId={a.id} businessId={id} />}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

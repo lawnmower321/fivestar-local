@@ -155,9 +155,10 @@ export async function updateClientDetailsAction(
 ): Promise<{ error: string } | void> {
   const user = await requireUser();
   const input = updateClientSchema.parse({ businessId, ...details });
+  const db = getDb();
+  let before: Awaited<ReturnType<typeof getBusiness>>;
   try {
-    const db = getDb();
-    const before = await getBusiness(db, input.businessId);
+    before = await getBusiness(db, input.businessId);
     await updateBusiness(db, input.businessId, {
       status: input.status,
       contactName: input.contactName,
@@ -165,14 +166,14 @@ export async function updateClientDetailsAction(
       contactPhone: input.contactPhone,
       reviewUrl: input.reviewUrl,
     });
-    if (before.status !== input.status) {
-      await insertActivity(db, {
-        businessId: input.businessId, userId: user.id,
-        type: "status_change", metadata: { from: before.status, to: input.status },
-      });
-    }
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Save failed — try again." };
+  }
+  if (before.status !== input.status) {
+    await insertActivity(db, {
+      businessId: input.businessId, userId: user.id,
+      type: "status_change", metadata: { from: before.status, to: input.status },
+    });
   }
   revalidatePath(`/admin/clients/${input.businessId}`, "layout");
 }
@@ -189,7 +190,7 @@ export async function addNoteAction(businessId: string, body: string): Promise<v
 export async function deleteNoteAction(activityId: string, businessId: string): Promise<void> {
   await requireUser();
   const input = deleteNoteSchema.parse({ activityId, businessId });
-  await deleteNoteActivity(getDb(), input.activityId);
+  await deleteNoteActivity(getDb(), input.activityId, input.businessId);
   revalidatePath(`/admin/clients/${input.businessId}/timeline`);
 }
 

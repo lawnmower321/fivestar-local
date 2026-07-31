@@ -57,18 +57,20 @@ describe("listActivities", () => {
 });
 
 describe("deleteNoteActivity", () => {
-  it("deletes by id AND type=note so non-notes can never be deleted", async () => {
+  it("deletes by id AND type=note AND business_id so non-notes and mismatched clients can never be deleted", async () => {
     const { db, calls } = fakeDb({ error: null });
-    await deleteNoteActivity(db, "a1");
+    await deleteNoteActivity(db, "a1", "biz-1");
     expect(calls.some((c) => c.method === "delete")).toBe(true);
     expect(calls).toContainEqual({ method: "eq", args: ["id", "a1"] });
     expect(calls).toContainEqual({ method: "eq", args: ["type", "note"] });
+    expect(calls).toContainEqual({ method: "eq", args: ["business_id", "biz-1"] });
   });
 });
 
 describe("listProfiles", () => {
   it("maps display_name to displayName", async () => {
-    const { db } = fakeDb({ data: [{ id: "u1", display_name: "Brendan" }] });
+    const { db, calls } = fakeDb({ data: [{ id: "u1", display_name: "Brendan" }] });
     expect(await listProfiles(db)).toEqual([{ id: "u1", displayName: "Brendan" }]);
+    expect(calls).toContainEqual({ method: "select", args: ["id, display_name"] });
   });
 });

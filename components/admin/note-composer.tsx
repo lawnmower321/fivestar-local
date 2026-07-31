@@ -1,22 +1,24 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { addNoteAction } from "@/app/admin/actions";
 
 export function NoteComposer({ businessId }: { businessId: string }) {
-  const formRef = useRef<HTMLFormElement>(null);
+  const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   return (
     <form
-      ref={formRef}
-      action={(fd: FormData) => {
-        const body = String(fd.get("body") ?? "").trim();
-        if (!body) return;
+      action={() => {
+        const trimmed = body.trim();
+        if (!trimmed) {
+          setError("Note can't be empty.");
+          return;
+        }
         startTransition(async () => {
           try {
-            await addNoteAction(businessId, body);
-            formRef.current?.reset();
+            await addNoteAction(businessId, trimmed);
+            setBody("");
             setError(null);
           } catch (e) {
             setError(e instanceof Error ? e.message : "Could not add note.");
@@ -31,6 +33,8 @@ export function NoteComposer({ businessId }: { businessId: string }) {
         required
         placeholder="Add a note…"
         aria-label="Add a note"
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
         className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-gblue"
       />
       <div className="mt-2 flex items-center justify-end gap-3">

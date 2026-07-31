@@ -23,7 +23,7 @@ export function DeleteNoteButton({ activityId, businessId }: { activityId: strin
             }
           })
         }
-        className="text-slate-300 hover:text-gred disabled:opacity-50"
+        className="text-slate-500 hover:text-gred disabled:opacity-50"
       >
         <X className="size-4" />
       </button>
