@@ -4,6 +4,7 @@ import {
   markPostedSchema, buildKbFromUrlSchema, buildKbFromTextSchema,
   saveKbSchema, saveVoiceSchema, extractVoiceSchema, deleteBusinessSchema,
   updateClientSchema, addNoteSchema, deleteNoteSchema,
+  createTaskSchema, setTaskStatusSchema, deleteTaskSchema,
 } from "@/app/admin/schemas";
 
 const UUID = "a2f7c1de-3b44-4e6f-9a10-8a2f1c3d4e5f";
@@ -171,5 +172,41 @@ describe("addNoteSchema", () => {
 describe("deleteNoteSchema", () => {
   it("requires uuids for both ids", () => {
     expect(() => deleteNoteSchema.parse({ activityId: "nope", businessId: "nope" })).toThrow();
+  });
+});
+
+describe("createTaskSchema", () => {
+  const uuid = "6f9619ff-8b86-4d01-b42d-00cf4fc964ff";
+  it("degrades empty businessId/dueDate/assignee to null", () => {
+    const out = createTaskSchema.parse({ businessId: "", title: "Send invoice", dueDate: "", assignee: "" });
+    expect(out).toEqual({ businessId: null, title: "Send invoice", dueDate: null, assignee: null });
+  });
+  it("accepts a full input", () => {
+    const out = createTaskSchema.parse({ businessId: uuid, title: " x ", dueDate: "2026-08-01", assignee: uuid });
+    expect(out.title).toBe("x");
+    expect(out.dueDate).toBe("2026-08-01");
+  });
+  it("rejects a malformed date and an empty title", () => {
+    expect(() => createTaskSchema.parse({ businessId: "", title: "x", dueDate: "8/1/2026", assignee: "" })).toThrow();
+    expect(() => createTaskSchema.parse({ businessId: "", title: "  ", dueDate: "", assignee: "" })).toThrow();
+  });
+});
+
+describe("setTaskStatusSchema", () => {
+  const uuid = "6f9619ff-8b86-4d01-b42d-00cf4fc964ff";
+  it("parses taskId + optional businessId + done flag", () => {
+    expect(setTaskStatusSchema.parse({ taskId: uuid, businessId: "", done: true }))
+      .toEqual({ taskId: uuid, businessId: null, done: true });
+  });
+});
+
+describe("deleteTaskSchema", () => {
+  const uuid = "6f9619ff-8b86-4d01-b42d-00cf4fc964ff";
+  it("parses taskId + optional businessId", () => {
+    expect(deleteTaskSchema.parse({ taskId: uuid, businessId: "" }))
+      .toEqual({ taskId: uuid, businessId: null });
+  });
+  it("rejects a non-uuid taskId", () => {
+    expect(() => deleteTaskSchema.parse({ taskId: "nope", businessId: "" })).toThrow();
   });
 });

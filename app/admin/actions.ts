@@ -10,12 +10,13 @@ import { extractVoice } from "@/lib/replydesk/ai/extract-voice";
 import { requireUser } from "./require-user";
 import { getAuthClient } from "./auth-client";
 import { canDeleteBusiness } from "@/lib/crm/status";
-import { insertActivity, deleteNoteActivity } from "@/lib/crm/db";
+import { insertActivity, deleteNoteActivity, createTask, completeTask, reopenTask, deleteTask } from "@/lib/crm/db";
 import {
   createBusinessSchema, saveKbSchema, saveVoiceSchema, buildKbFromUrlSchema,
   buildKbFromTextSchema, extractVoiceSchema, generateReplySchema,
   markPostedSchema, deleteBusinessSchema, updateClientSchema,
   addNoteSchema, deleteNoteSchema,
+  createTaskSchema, setTaskStatusSchema, deleteTaskSchema,
 } from "./schemas";
 
 export async function createBusinessAction(formData: FormData): Promise<void> {
@@ -192,6 +193,56 @@ export async function deleteNoteAction(activityId: string, businessId: string): 
   const input = deleteNoteSchema.parse({ activityId, businessId });
   await deleteNoteActivity(getDb(), input.activityId, input.businessId);
   revalidatePath(`/admin/clients/${input.businessId}/timeline`);
+}
+
+function revalidateTaskSurfaces(businessId: string | null): void {
+  revalidatePath("/admin");
+  revalidatePath("/admin/tasks");
+  if (businessId) revalidatePath(`/admin/clients/${businessId}`, "layout");
+}
+
+export async function createTaskAction(input: {
+  businessId: string; title: string; dueDate: string; assignee: string;
+}): Promise<{ error: string } | void> {
+  const user = await requireUser();
+  const p = createTaskSchema.parse(input);
+  try {
+    await createTask(getDb(), {
+      businessId: p.businessId, assignee: p.assignee, title: p.title,
+      dueDate: p.dueDate, createdBy: user.id,
+    });
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Create failed — try again." };
+  }
+  revalidateTaskSurfaces(p.businessId);
+}
+
+export async function setTaskStatusAction(taskId: string, businessId: string, done: boolean): Promise<void> {
+  const user = await requireUser();
+  const p = setTaskStatusSchema.parse({ taskId, businessId, done });
+  const db = getDb();
+  if (p.done) {
+    const task = await completeTask(db, p.taskId);
+    // task_completed lands on the client timeline only for client-linked
+    // tasks (spec: general to-dos have no timeline). Title snapshot in body
+    // so history survives task deletion.
+    if (task.businessId) {
+      await insertActivity(db, {
+        businessId: task.businessId, userId: user.id,
+        type: "task_completed", body: task.title,
+      });
+    }
+  } else {
+    await reopenTask(db, p.taskId);
+  }
+  revalidateTaskSurfaces(p.businessId);
+}
+
+export async function deleteTaskAction(taskId: string, businessId: string): Promise<void> {
+  await requireUser();
+  const p = deleteTaskSchema.parse({ taskId, businessId });
+  await deleteTask(getDb(), p.taskId);
+  revalidateTaskSurfaces(p.businessId);
 }
 
 export async function logoutAction(): Promise<void> {
