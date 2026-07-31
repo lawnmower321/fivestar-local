@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-// Phase 3 adds { label: "Timeline", segment: "/timeline" }; Phase 4 adds Tasks.
+// Phase 4 inserts { label: "Tasks", segment: "/tasks" } before Timeline.
 const TABS = [
   { label: "Overview", segment: "" },
   { label: "ReplyDesk", segment: "/replydesk" },
+  { label: "Timeline", segment: "/timeline" },
 ];
 
 export function ClientTabs({ clientId }: { clientId: string }) {
