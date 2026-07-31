@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, ListTodo, LogOut } from "lucide-react";
 import { logoutAction } from "@/app/admin/actions";
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
   SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-// App-shell nav. Entries appear when their phase ships (Phase 2: Clients).
+// App-shell nav. Entries appear when their phase ships (Phase 2: Clients;
+// Phase 4: Dashboard, Tasks). Dashboard uses an exact pathname match so it
+// isn't highlighted on every /admin/* page; Clients/Tasks use prefix match.
 export function AdminSidebar() {
   const pathname = usePathname();
   return (
@@ -28,11 +30,29 @@ export function AdminSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
+                  isActive={pathname === "/admin"}
+                  render={<Link href="/admin" />}
+                >
+                  <LayoutDashboard />
+                  <span>Dashboard</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
                   isActive={pathname.startsWith("/admin/clients")}
                   render={<Link href="/admin/clients" />}
                 >
                   <Users />
                   <span>Clients</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={pathname.startsWith("/admin/tasks")}
+                  render={<Link href="/admin/tasks" />}
+                >
+                  <ListTodo />
+                  <span>Tasks</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

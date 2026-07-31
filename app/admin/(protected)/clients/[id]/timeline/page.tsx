@@ -1,22 +1,11 @@
-import { StickyNote, MessageSquare, ArrowRightLeft, BookOpen, CheckCircle2 } from "lucide-react";
 import { getDb } from "@/lib/replydesk/db";
 import { listActivities, listProfiles } from "@/lib/crm/db";
 import { activityLabel } from "@/lib/crm/timeline";
-import type { ActivityType } from "@/lib/crm/types";
 import { NoteComposer } from "@/components/admin/note-composer";
 import { DeleteNoteButton } from "@/components/admin/delete-note-button";
+import { ACTIVITY_ICONS } from "@/components/admin/activity-icons";
 
 export const dynamic = "force-dynamic";
-
-// One muted icon per activity type — a note whose text happens to read like
-// a system event (e.g. "Posted a review reply") stays visually distinct.
-const ACTIVITY_ICONS: Record<ActivityType, typeof StickyNote> = {
-  note: StickyNote,
-  reply_posted: MessageSquare,
-  status_change: ArrowRightLeft,
-  kb_updated: BookOpen,
-  task_completed: CheckCircle2,
-};
 
 export default async function TimelinePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

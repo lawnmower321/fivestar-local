@@ -25,8 +25,15 @@ MAP
   SidebarInset). A route group (no URL segment): everything placed inside it
   requires a valid session; login/ is a sibling, not a child, so it is never
   subject to this guard.
-- (protected)/page.tsx — interim redirect to /admin/clients (Phase 4 replaces
-  it with the today-dashboard).
+- (protected)/page.tsx — today-dashboard: tasks due today/overdue (via
+  listAllTasks/bucketTasks) + cross-client recent activity feed
+  (listRecentActivities), each activity row iconed via
+  components/admin/activity-icons.ACTIVITY_ICONS (shared with the Timeline
+  tab so the same data looks the same in both places).
+- (protected)/tasks/page.tsx — cross-client task workflow view: same
+  TaskForm/TaskItem/bucketTasks as the per-client tasks tab, but over
+  listAllTasks with a client picker (listBusinesses) instead of a fixed
+  businessId.
 - (protected)/clients/page.tsx — client list: status filter chips, table,
   add-client form.
 - (protected)/clients/[id]/layout.tsx — client header (name, status badge,

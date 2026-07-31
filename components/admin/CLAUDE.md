@@ -15,8 +15,13 @@ MAP
 - delete-business.tsx — type-the-name hard delete danger zone. Lead-only:
   the Overview page hides it for non-leads and deleteBusinessAction refuses
   them server-side.
-- admin-sidebar.tsx — shadcn sidebar nav (Clients + logout); active state
-  via usePathname. New entries appear as phases ship.
+- admin-sidebar.tsx — shadcn sidebar nav (Dashboard, Clients, Tasks +
+  logout); active state via usePathname (Dashboard: exact match on /admin
+  so it isn't active on every /admin/* page; Clients/Tasks: prefix match).
+  New entries appear as phases ship.
+- activity-icons.ts — ACTIVITY_ICONS: one lucide icon per ActivityType,
+  shared by the client Timeline tab and the /admin dashboard's recent
+  activity list so the same activity data renders identically in both.
 - status-badge.tsx — ClientStatus → themed Badge; the single source of
   status badge classes (list rows + client-record header).
 - client-tabs.tsx — Overview/ReplyDesk/Timeline tab links for the client
