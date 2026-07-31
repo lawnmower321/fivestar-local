@@ -19,7 +19,11 @@ MAP
   via usePathname. New entries appear as phases ship.
 - status-badge.tsx — ClientStatus → themed Badge; the single source of
   status badge classes (list rows + client-record header).
-- client-tabs.tsx — Overview/ReplyDesk tab links for the client record;
-  active by exact pathname match.
+- client-tabs.tsx — Overview/ReplyDesk/Timeline tab links for the client
+  record; active by exact pathname match.
 - client-details-form.tsx — status select + contact/review-link fields;
   calls updateClientDetailsAction, renders its {error} inline.
+- note-composer.tsx — textarea + submit for addNoteAction; renders its
+  thrown error inline, matching delete-business.tsx's convention.
+- delete-note-button.tsx — per-note delete (X icon) for deleteNoteAction;
+  renders its thrown error inline, same convention.

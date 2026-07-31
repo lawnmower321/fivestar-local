@@ -181,3 +181,14 @@ findBusiness (.maybeSingle) lets route code call notFound(), caught by a
 boundary at app/admin/(protected)/clients/not-found.tsx — placed at the
 PARENT (not the [id]) segment because a segment's own not-found.js nests
 inside its layout and so cannot catch that layout's own guard throw.
+
+## 2026-07-31 — Phase 3: activity timeline (activities table, app-level writers)
+activities (0004) is the one-table timeline: notes are type 'note'; reply
+posts, KB/voice saves (kb_updated, metadata.section distinguishes), and real
+status changes write from the actions themselves (no DB triggers — testable
+writers, per the vision spec). Only notes are deletable, enforced by the db
+helper's type='note' filter, not just the UI. body is null except note text
+and task_completed's task-title snapshot; other labels derive from
+type+metadata (lib/crm/timeline.activityLabel). Writer failures propagate
+loudly. Timestamps render in America/New_York (user decision 2026-07-31,
+spec 2026-07-31-phases-3-5-design.md).
