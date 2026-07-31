@@ -15,3 +15,19 @@ export type Activity = {
 };
 
 export type Profile = { id: string; displayName: string };
+
+export type TaskStatus = "open" | "done";
+
+export type Task = {
+  id: string;
+  businessId: string | null;
+  assignee: string | null;
+  title: string;
+  dueDate: string | null;     // YYYY-MM-DD
+  status: TaskStatus;
+  createdBy: string | null;
+  createdAt: string;
+  completedAt: string | null;
+};
+
+export type TaskWithBusiness = Task & { businessName: string | null };
