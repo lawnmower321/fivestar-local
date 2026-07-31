@@ -64,7 +64,7 @@ describe("buildAttention", () => {
 
   it("handles PostgREST timestamp format (+00:00) correctly", () => {
     // PostgREST returns timestamps with +00:00 suffix, not .000Z. Verify epoch-based
-    // comparison handles mixed formats: recent +00:00 is NOT stale, old +00:00 IS stale.
+    // comparison: far-future +00:00 is not stale, far-past +00:00 is stale.
     const recentPostgREST = [meta({ postedAt: "2026-07-29T18:00:00+00:00" })];
     expect(buildAttention([joes], recentPostgREST, NOW)).toEqual([]);
 
@@ -72,5 +72,12 @@ describe("buildAttention", () => {
     expect(buildAttention([joes], oldPostgREST, NOW)[0].reasons).toEqual([
       "No reply posted in 7+ days",
     ]);
+
+    // Boundary case: postedAt exactly equals cutoff (2026-07-24T12:00:00 with NOW=2026-07-31T12:00:00Z).
+    // Expressed in PostgREST +00:00 format. Should NOT be flagged (< excludes equality).
+    // Old string comparison: "2026-07-24T12:00:00+00:00" vs "2026-07-24T12:00:00.000Z"
+    // diverges at index 19 (+0x2B vs .0x2E), wrongly flagging it stale by ASCII accident.
+    const atCutoff = [meta({ postedAt: "2026-07-24T12:00:00+00:00" })];
+    expect(buildAttention([joes], atCutoff, NOW)).toEqual([]);
   });
 });
