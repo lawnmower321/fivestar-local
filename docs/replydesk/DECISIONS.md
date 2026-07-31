@@ -192,3 +192,13 @@ and task_completed's task-title snapshot; other labels derive from
 type+metadata (lib/crm/timeline.activityLabel). Writer failures propagate
 loudly. Timestamps render in America/New_York (user decision 2026-07-31,
 spec 2026-07-31-phases-3-5-design.md).
+
+## 2026-07-31 — Phase 4: tasks & today-dashboard
+tasks (0005): business_id nullable (general to-dos), assignee null = "either
+of us". Tasks are hard-deletable (user decision 2026-07-31) — a mis-created
+task must not force a bogus task_completed timeline entry. Completing a
+client-linked task writes task_completed (title snapshot in body); reopening
+leaves that entry (history is fact) and writes nothing. Due-date math runs in
+America/New_York via lib/crm/dates (todayInTimeZone); dashboard = today +
+overdue only; undated tasks live in /admin/tasks' Anytime section. /admin is
+now the today-dashboard, replacing the Phase-2 redirect.

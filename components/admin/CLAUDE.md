@@ -24,11 +24,19 @@ MAP
   activity list so the same activity data renders identically in both.
 - status-badge.tsx — ClientStatus → themed Badge; the single source of
   status badge classes (list rows + client-record header).
-- client-tabs.tsx — Overview/ReplyDesk/Timeline tab links for the client
-  record; active by exact pathname match.
+- client-tabs.tsx — Overview/ReplyDesk/Tasks/Timeline tab links for the
+  client record; active by exact pathname match.
 - client-details-form.tsx — status select + contact/review-link fields;
   calls updateClientDetailsAction, renders its {error} inline.
 - note-composer.tsx — textarea + submit for addNoteAction; renders its
   thrown error inline, matching delete-business.tsx's convention.
 - delete-note-button.tsx — per-note delete (X icon) for deleteNoteAction;
   renders its thrown error inline, same convention.
+- task-form.tsx — controlled add-task form (title/due date/assignee, +client
+  picker when businessId isn't fixed); controlled state throughout (not
+  useRef+reset) so a returned {error} doesn't render over an emptied form;
+  renders createTaskAction's {error} inline.
+- task-item.tsx — checkbox (setTaskStatusAction) + delete (X, deleteTaskAction)
+  per task row; checked state is driven by the server-fetched task prop, not
+  optimistic local state, so a thrown action leaves it exactly where server
+  truth says it is, with the error rendered inline below the row.

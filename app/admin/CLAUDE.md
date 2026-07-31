@@ -12,6 +12,9 @@ INVARIANTS
   "layout") so every tab under clients/[id] picks up the new row, not just
   the page that wrote it. addNoteAction/deleteNoteAction revalidate only the
   timeline route itself.
+- Task actions (createTaskAction, setTaskStatusAction, deleteTaskAction)
+  share revalidateTaskSurfaces: always revalidates /admin and /admin/tasks,
+  plus the client layout when the task is business-linked.
 - Server actions SELF-AUTHENTICATE: every action calls await requireUser() (require-user.ts) as its first statement and zod-parses its input (schemas.ts) before any DB/AI call; the login action is exempt. require-user.ts reads the session via the @supabase/ssr auth client (auth-client.ts) so it lives here in the shell, never in lib/replydesk (no next/* there).
 - Secrets are read only inside server code. Nothing here is public marketing
   UI — but keep the same Tailwind design language as the site.
@@ -37,11 +40,14 @@ MAP
 - (protected)/clients/page.tsx — client list: status filter chips, table,
   add-client form.
 - (protected)/clients/[id]/layout.tsx — client header (name, status badge,
-  review link) + tab links (Overview | ReplyDesk | Timeline).
+  review link) + tab links (Overview | ReplyDesk | Tasks | Timeline).
 - (protected)/clients/[id]/page.tsx — Overview tab: details form + lead-only
   danger zone (churned guidance for non-leads; server enforces the guard).
 - (protected)/clients/[id]/replydesk/page.tsx — KB builder + reply workspace
   (client components in components/admin/).
+- (protected)/clients/[id]/tasks/page.tsx — Tasks tab: this client's tasks
+  only (listTasksForBusiness), same TaskForm/TaskItem/bucketTasks buckets
+  (Overdue/Today/Upcoming/Anytime/Done) as the cross-client view.
 - (protected)/clients/[id]/timeline/page.tsx — Timeline tab: note composer
   + activity list (listActivities/listProfiles, rendered via
   lib/crm/timeline.activityLabel); only note-type rows get a delete button.
