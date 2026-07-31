@@ -156,8 +156,22 @@ describe("recentPostedAcrossClients", () => {
     expect(out[0].businessName).toBe("Joe's");
     expect(out[0].review.id).toBe("r1");
     expect(calls).toContainEqual({ method: "eq", args: ["status", "posted"] });
-    expect(calls).toContainEqual({ method: "order", args: ["posted_at", { ascending: false }] });
+    expect(calls).toContainEqual({
+      method: "order", args: ["posted_at", { ascending: false, nullsFirst: false }],
+    });
     expect(calls).toContainEqual({ method: "limit", args: [20] });
+  });
+
+  it("maps a missing joined business to null, not empty string", async () => {
+    const rows = [{
+      id: "r1", business_id: "b1", rating: 5, reviewer: "Ann", review_text: "great",
+      reply_text: "thanks", detail_referenced: null, similarity: 0.1, flags: [],
+      status: "posted", created_at: "2026-07-30T00:00:00Z",
+      posted_at: "2026-07-30T01:00:00Z", businesses: null,
+    }];
+    const { db } = fakeDb({ data: rows });
+    const out = await recentPostedAcrossClients(db);
+    expect(out[0].businessName).toBeNull();
   });
 });
 
@@ -174,5 +188,17 @@ describe("listReviewMeta", () => {
       { businessId: "b1", status: "draft", createdAt: "2026-07-30T00:00:00Z", postedAt: null },
     ]);
     expect(calls).toContainEqual({ method: "in", args: ["business_id", ["b1", "b2"]] });
+  });
+  it("orders by created_at descending, newest first", async () => {
+    // The entire result feeds buildAttention, which needs the latest row per
+    // client (draft signal) and the newest posted_at (staleness signal).
+    // Without an ORDER BY, any future row cap would truncate arbitrarily and
+    // silently corrupt both signals — so this ordering call must never be
+    // removed without a replacement guarantee.
+    const { db, calls } = fakeDb({ data: [] });
+    await listReviewMeta(db, ["b1"]);
+    expect(calls).toContainEqual({
+      method: "order", args: ["created_at", { ascending: false }],
+    });
   });
 });

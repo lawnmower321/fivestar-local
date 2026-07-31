@@ -12,7 +12,11 @@ INVARIANTS
   (`new Date(x).getTime()`), never string comparison: PostgREST serializes
   `timestamptz` as `"...+00:00"` while `toISOString()` produces `"...000Z"` —
   equal instants, unequal strings, so a naive `<` on the raw strings
-  misclassifies boundary cases.
+  misclassifies boundary cases. This applies to `timestamptz` columns only.
+  `due_date` is a Postgres `date` column, serialized as a bare `YYYY-MM-DD`
+  with no offset — dates.ts/tasks.ts deliberately compare those as strings
+  (ISO-format YYYY-MM-DD strings sort correctly lexically), which is correct,
+  not a violation of this invariant.
 
 MAP
 - status.ts — client status enum (STATUSES, ClientStatus), isClientStatus,
@@ -36,9 +40,11 @@ MAP
 - tasks.ts — TaskBuckets, bucketTasks: one overdue/today/upcoming/anytime/done
   bucketing rule shared by the client tab, /admin/tasks, and the dashboard.
 - timeline.ts — activityLabel: one-line display text per activity.
-- attention.ts — STALE_DAYS (7), ReviewMeta, buildAttention(clients, reviews,
-  now, staleDays?): pure "needs attention" heuristic (latest review row is an
+- attention.ts — STALE_DAYS (7), buildAttention(clients, reviews, now,
+  staleDays?): pure "needs attention" heuristic (latest review row is an
   unposted draft, and/or no posted reply in staleDays+ days / ever); callers
-  pass ACTIVE clients only.
+  pass ACTIVE clients only. ReviewMeta itself is defined in
+  lib/replydesk/types.ts (it's a reviews-table projection, ReplyDesk domain)
+  and imported here type-only; re-exported from this module for convenience.
 
 TESTS: tests/crm/

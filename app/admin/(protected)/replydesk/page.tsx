@@ -53,10 +53,17 @@ export default async function ReplyDeskDashboard() {
             {recent.map(({ review, businessName }) => (
               <li key={review.id} className="rounded-xl border border-slate-200 bg-white px-4 py-3">
                 <p className="text-xs text-slate-400">
-                  <Link href={`/admin/clients/${review.businessId}/replydesk`} className="font-medium text-slate-600 hover:text-gblue hover:underline">
-                    {businessName}
-                  </Link>
-                  {" · "}{"★".repeat(review.rating)}
+                  {businessName ? (
+                    <Link href={`/admin/clients/${review.businessId}/replydesk`} className="font-medium text-slate-600 hover:text-gblue hover:underline">
+                      {businessName}
+                    </Link>
+                  ) : (
+                    "Unknown client"
+                  )}
+                  {" · "}
+                  <span aria-label={`${review.rating} stars`}>
+                    <span aria-hidden="true">{"★".repeat(review.rating)}</span>
+                  </span>
                   {review.reviewer && ` · ${review.reviewer}`}
                   {review.postedAt && ` · ${new Date(review.postedAt).toLocaleDateString("en-US", { dateStyle: "medium", timeZone: "America/New_York" })}`}
                 </p>

@@ -234,3 +234,29 @@ client because draft rows are an accumulating audit trail (regenerations).
 Heuristic is pure (lib/crm/attention.buildAttention); review readers live in
 lib/replydesk/db (reviews are ReplyDesk domain). Read-only page — no new
 actions.
+
+## 2026-07-31 — Phase 5 fix wave: listReviewMeta ordering, null-join convention, nullsFirst
+Whole-branch review of Phase 5 found six issues, all fixed together (no second
+wave planned). (1) listReviewMeta now orders by created_at desc — it was
+unbounded AND unordered, and it is the entire input to buildAttention on a
+force-dynamic page; any future row cap (PostgREST db-max-rows, or a defensive
+.limit()) would otherwise truncate arbitrarily and silently compute a wrong
+verdict for both A5 signals. (2) recentPostedAcrossClients now maps a missing
+business join to null, not "" — the Phase 4 fix wave deliberately rejected the
+""-for-missing-join convention (see above) so listRecentActivities/listAllTasks
+agree; this reader had reintroduced it. The dashboard page renders the null
+case as plain "Unknown client" text, matching the Phase-4 dashboard's pattern.
+(3) Both recentPostedAcrossClients and recentPostedReplies now order posted_at
+desc with nullsFirst:false — Postgres defaults DESC to nulls-first, and
+0001_replydesk.sql never ties status='posted' to a non-null posted_at, so
+without this a null-postedAt posted row would sort to the top of "Recent
+replies" with no date shown. (4) ReviewMeta moved from lib/crm/attention.ts to
+lib/replydesk/types.ts (beside Review) — it's a projection of the reviews
+table, so lib/replydesk/db.ts should own it rather than importing its own
+table's row shape from lib/crm; attention.ts now imports it type-only and
+re-exports it. (5) The star-rating glyphs on /admin/replydesk now render
+behind aria-hidden with an aria-label text alternative, matching every other
+icon on this branch. (6) lib/crm/CLAUDE.md's timestamp-comparison invariant
+now notes it applies to timestamptz columns only — due_date is a Postgres
+date column (bare YYYY-MM-DD, no offset), so dates.ts/tasks.ts's string
+comparisons there are correct, not a violation.

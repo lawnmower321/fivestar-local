@@ -43,3 +43,14 @@ export type GeneratedReply = {
   gate: GateReport;
   attempts: number;       // 1..3
 };
+
+// Projection of the reviews table used by the cross-client "needs attention"
+// heuristic (lib/crm/attention.buildAttention). Lives here, not lib/crm/types,
+// because reviews are ReplyDesk domain (docs/replydesk/DECISIONS.md, Phase 5
+// entry) — lib/crm/attention.ts imports this type-only from here.
+export type ReviewMeta = {
+  businessId: string;
+  status: ReviewStatus;
+  createdAt: string;
+  postedAt: string | null;
+};

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { buildAttention, STALE_DAYS, type ReviewMeta } from "@/lib/crm/attention";
+import { buildAttention, STALE_DAYS } from "@/lib/crm/attention";
+import type { ReviewMeta } from "@/lib/replydesk/types";
 
 const NOW = new Date("2026-07-31T12:00:00Z");
 const joes = { id: "b1", name: "Joe's" };

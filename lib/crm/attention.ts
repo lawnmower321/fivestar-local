@@ -3,14 +3,14 @@
 // ACTIVE clients only. Draft rows accumulate as an audit trail (regenerations
 // insert new rows), so the draft signal reads only the LATEST row per client.
 
-export const STALE_DAYS = 7;
+// ReviewMeta is a projection of the reviews table (ReplyDesk domain), so it
+// lives in lib/replydesk/types.ts beside Review, not here. Type-only import —
+// erased at build time, so this file still emits no runtime dependency on
+// lib/replydesk.
+import type { ReviewMeta } from "../replydesk/types";
+export type { ReviewMeta };
 
-export type ReviewMeta = {
-  businessId: string;
-  status: "draft" | "posted";
-  createdAt: string;
-  postedAt: string | null;
-};
+export const STALE_DAYS = 7;
 
 export type AttentionItem = { businessId: string; businessName: string; reasons: string[] };
 

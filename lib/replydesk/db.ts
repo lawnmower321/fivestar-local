@@ -1,7 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Business, Review } from "./types";
+import type { Business, Review, ReviewMeta } from "./types";
 import type { ClientStatus } from "../crm/status";
-import type { ReviewMeta } from "../crm/attention";
 
 export function getDb(): SupabaseClient {
   const url = process.env.SUPABASE_URL;
@@ -114,7 +113,7 @@ export async function recentPostedReplies(
   const { data, error } = await db.from("reviews").select("reply_text")
     .eq("business_id", businessId).eq("status", "posted")
     .not("reply_text", "is", null)
-    .order("posted_at", { ascending: false }).limit(limit);
+    .order("posted_at", { ascending: false, nullsFirst: false }).limit(limit);
   return must(data, error).map((r) => r.reply_text as string);
 }
 
@@ -138,22 +137,33 @@ export async function countReviews(db: SupabaseClient, businessId: string): Prom
 
 export async function recentPostedAcrossClients(
   db: SupabaseClient, limit = 20,
-): Promise<{ review: Review; businessName: string }[]> {
+): Promise<{ review: Review; businessName: string | null }[]> {
   const { data, error } = await db.from("reviews").select("*, businesses(name)")
-    .eq("status", "posted").order("posted_at", { ascending: false }).limit(limit);
+    .eq("status", "posted")
+    .order("posted_at", { ascending: false, nullsFirst: false }).limit(limit);
+  // Missing joined business maps to null (not ""), matching
+  // lib/crm/db.listRecentActivities/listAllTasks's convention, so a renderer
+  // can't mistake an empty string for a real (if blank) business name.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return must(data, error).map((r: any) => ({
-    review: rowToReview(r), businessName: r.businesses?.name ?? "",
+    review: rowToReview(r), businessName: r.businesses?.name ?? null,
   }));
 }
 
+// The whole result feeds buildAttention (lib/crm/attention.ts), which needs
+// only the LATEST review row per client for the draft signal and the newest
+// posted_at for the staleness signal — ordering newest-first means any future
+// row cap (a configured PostgREST db-max-rows, or a defensive .limit() added
+// later) truncates to the newest rows instead of an arbitrary unordered
+// slice, which is what both signals need to stay correct.
 export async function listReviewMeta(
   db: SupabaseClient, businessIds: string[],
 ): Promise<ReviewMeta[]> {
   if (businessIds.length === 0) return [];
   const { data, error } = await db.from("reviews")
     .select("business_id, status, created_at, posted_at")
-    .in("business_id", businessIds);
+    .in("business_id", businessIds)
+    .order("created_at", { ascending: false });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return must(data, error).map((r: any) => ({
     businessId: r.business_id, status: r.status,
