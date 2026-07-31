@@ -10,10 +10,12 @@ import { extractVoice } from "@/lib/replydesk/ai/extract-voice";
 import { requireUser } from "./require-user";
 import { getAuthClient } from "./auth-client";
 import { canDeleteBusiness } from "@/lib/crm/status";
+import { insertActivity, deleteNoteActivity } from "@/lib/crm/db";
 import {
   createBusinessSchema, saveKbSchema, saveVoiceSchema, buildKbFromUrlSchema,
   buildKbFromTextSchema, extractVoiceSchema, generateReplySchema,
   markPostedSchema, deleteBusinessSchema, updateClientSchema,
+  addNoteSchema, deleteNoteSchema,
 } from "./schemas";
 
 export async function createBusinessAction(formData: FormData): Promise<void> {
@@ -27,17 +29,27 @@ export async function createBusinessAction(formData: FormData): Promise<void> {
 }
 
 export async function saveKbAction(businessId: string, kbMd: string): Promise<void> {
-  await requireUser();
+  const user = await requireUser();
   const input = saveKbSchema.parse({ businessId, kbMd });
-  await updateBusiness(getDb(), input.businessId, { kbMd: input.kbMd });
-  revalidatePath(`/admin/clients/${input.businessId}/replydesk`);
+  const db = getDb();
+  await updateBusiness(db, input.businessId, { kbMd: input.kbMd });
+  await insertActivity(db, {
+    businessId: input.businessId, userId: user.id,
+    type: "kb_updated", metadata: { section: "kb" },
+  });
+  revalidatePath(`/admin/clients/${input.businessId}`, "layout");
 }
 
 export async function saveVoiceAction(businessId: string, voiceMd: string): Promise<void> {
-  await requireUser();
+  const user = await requireUser();
   const input = saveVoiceSchema.parse({ businessId, voiceMd });
-  await updateBusiness(getDb(), input.businessId, { voiceMd: input.voiceMd });
-  revalidatePath(`/admin/clients/${input.businessId}/replydesk`);
+  const db = getDb();
+  await updateBusiness(db, input.businessId, { voiceMd: input.voiceMd });
+  await insertActivity(db, {
+    businessId: input.businessId, userId: user.id,
+    type: "kb_updated", metadata: { section: "voice" },
+  });
+  revalidatePath(`/admin/clients/${input.businessId}`, "layout");
 }
 
 export async function buildKbFromUrlAction(businessId: string, url: string): Promise<string> {
@@ -104,10 +116,15 @@ export async function generateReplyAction(input: {
 }
 
 export async function markPostedAction(reviewId: string, businessId: string): Promise<void> {
-  await requireUser();
+  const user = await requireUser();
   const input = markPostedSchema.parse({ reviewId, businessId });
-  await markPosted(getDb(), input.reviewId);
-  revalidatePath(`/admin/clients/${input.businessId}/replydesk`);
+  const db = getDb();
+  await markPosted(db, input.reviewId);
+  await insertActivity(db, {
+    businessId: input.businessId, userId: user.id,
+    type: "reply_posted", metadata: { review_id: input.reviewId },
+  });
+  revalidatePath(`/admin/clients/${input.businessId}`, "layout");
 }
 
 export async function deleteBusinessAction(businessId: string): Promise<{ error: string } | void> {
@@ -136,20 +153,44 @@ export async function updateClientDetailsAction(
     reviewUrl: string;
   },
 ): Promise<{ error: string } | void> {
-  await requireUser();
+  const user = await requireUser();
   const input = updateClientSchema.parse({ businessId, ...details });
   try {
-    await updateBusiness(getDb(), input.businessId, {
+    const db = getDb();
+    const before = await getBusiness(db, input.businessId);
+    await updateBusiness(db, input.businessId, {
       status: input.status,
       contactName: input.contactName,
       contactEmail: input.contactEmail,
       contactPhone: input.contactPhone,
       reviewUrl: input.reviewUrl,
     });
+    if (before.status !== input.status) {
+      await insertActivity(db, {
+        businessId: input.businessId, userId: user.id,
+        type: "status_change", metadata: { from: before.status, to: input.status },
+      });
+    }
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Save failed — try again." };
   }
   revalidatePath(`/admin/clients/${input.businessId}`, "layout");
+}
+
+export async function addNoteAction(businessId: string, body: string): Promise<void> {
+  const user = await requireUser();
+  const input = addNoteSchema.parse({ businessId, body });
+  await insertActivity(getDb(), {
+    businessId: input.businessId, userId: user.id, type: "note", body: input.body,
+  });
+  revalidatePath(`/admin/clients/${input.businessId}/timeline`);
+}
+
+export async function deleteNoteAction(activityId: string, businessId: string): Promise<void> {
+  await requireUser();
+  const input = deleteNoteSchema.parse({ activityId, businessId });
+  await deleteNoteActivity(getDb(), input.activityId);
+  revalidatePath(`/admin/clients/${input.businessId}/timeline`);
 }
 
 export async function logoutAction(): Promise<void> {
