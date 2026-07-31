@@ -223,10 +223,18 @@ export async function setTaskStatusAction(taskId: string, businessId: string, do
   const db = getDb();
   if (p.done) {
     const task = await completeTask(db, p.taskId);
-    // task_completed lands on the client timeline only for client-linked
-    // tasks (spec: general to-dos have no timeline). Title snapshot in body
-    // so history survives task deletion.
-    if (task.businessId) {
+    // Revalidate as soon as the primary write (completeTask) has landed —
+    // BEFORE the activity insert below — so the checkbox reflects the done
+    // status even if the activity write then throws. That throw must still
+    // propagate (activity-writer failures are loud by design), but it must
+    // not also suppress revalidation of a change that already committed.
+    revalidateTaskSurfaces(p.businessId);
+    // completeTask returns null when the task was already done (no real
+    // open->done transition) — a no-op re-completion, so no duplicate
+    // task_completed activity. task_completed also lands on the client
+    // timeline only for client-linked tasks (spec: general to-dos have no
+    // timeline). Title snapshot in body so history survives task deletion.
+    if (task?.businessId) {
       await insertActivity(db, {
         businessId: task.businessId, userId: user.id,
         type: "task_completed", body: task.title,
@@ -234,8 +242,8 @@ export async function setTaskStatusAction(taskId: string, businessId: string, do
     }
   } else {
     await reopenTask(db, p.taskId);
+    revalidateTaskSurfaces(p.businessId);
   }
-  revalidateTaskSurfaces(p.businessId);
 }
 
 export async function deleteTaskAction(taskId: string, businessId: string): Promise<void> {

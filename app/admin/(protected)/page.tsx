@@ -54,9 +54,13 @@ export default async function AdminDashboard() {
                   <div className="min-w-0">
                     <p className="text-sm text-slate-800">{activityLabel(a)}</p>
                     <p className="mt-0.5 text-xs text-slate-400">
-                      <Link href={`/admin/clients/${a.businessId}/timeline`} className="hover:text-gblue hover:underline">
-                        {a.businessName}
-                      </Link>
+                      {a.businessName ? (
+                        <Link href={`/admin/clients/${a.businessId}/timeline`} className="hover:text-gblue hover:underline">
+                          {a.businessName}
+                        </Link>
+                      ) : (
+                        "Unknown client"
+                      )}
                       {" · "}
                       {a.userId ? (nameOf.get(a.userId) ?? "Former user") : "Former user"}
                       {" · "}

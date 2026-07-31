@@ -16,11 +16,18 @@ MAP
   shared shapes); TaskStatus, Task, TaskWithBusiness (tasks' shapes —
   businessId/assignee/dueDate all nullable).
 - dates.ts — FOUNDER_TZ ("America/New_York"); todayInTimeZone, isOverdue,
-  isDueToday — the one place due-date/overdue math is computed.
+  isDueToday — the one place due-date/overdue math is computed; formatDueDate
+  (parses the YYYY-MM-DD string's own parts — never `new Date(str)`, which
+  parses as UTC midnight and renders a day early in FOUNDER_TZ).
 - db.ts — activity + profile db helpers (insertActivity, listActivities,
-  deleteNoteActivity, listProfiles, listRecentActivities) and task db
-  helpers (createTask, listTasksForBusiness, listAllTasks, completeTask,
-  reopenTask, deleteTask), injected SupabaseClient like lib/replydesk/db.ts.
+  deleteNoteActivity, listProfiles, listRecentActivities — missing joined
+  business maps to null, matching listAllTasks) and task db helpers
+  (createTask, listTasksForBusiness, listAllTasks, completeTask, reopenTask,
+  deleteTask), injected SupabaseClient like lib/replydesk/db.ts. completeTask
+  is a real state transition (`.eq("status","open")` + maybeSingle): it
+  returns the row only when open->done actually happened, null when the task
+  was already done, so callers don't write a duplicate task_completed
+  activity on a no-op re-completion.
 - tasks.ts — TaskBuckets, bucketTasks: one overdue/today/upcoming/anytime/done
   bucketing rule shared by the client tab, /admin/tasks, and the dashboard.
 - timeline.ts — activityLabel: one-line display text per activity.

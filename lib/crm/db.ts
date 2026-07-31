@@ -83,17 +83,27 @@ export async function listTasksForBusiness(db: SupabaseClient, businessId: strin
 export async function listAllTasks(db: SupabaseClient): Promise<TaskWithBusiness[]> {
   const { data, error } = await db.from("tasks").select("*, businesses(name)")
     .order("created_at", { ascending: false });
+  // business_id is genuinely nullable here (general to-dos have no client) —
+  // null means "no business", matching listRecentActivities' convention below.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return must(data, error).map((r: any) => ({
     ...rowToTask(r), businessName: r.businesses?.name ?? null,
   }));
 }
 
-export async function completeTask(db: SupabaseClient, id: string): Promise<Task> {
+// Real state transition, not an unconditional write: the `.eq("status",
+// "open")` + maybeSingle() means this returns the row ONLY when an open task
+// actually flipped to done, and null when it was already done (no-op). That
+// lets callers (setTaskStatusAction) tell a real completion from a re-click
+// on an already-completed task, so they don't insert a duplicate
+// task_completed activity — activities are immutable, so a duplicate would
+// be permanent junk on the timeline.
+export async function completeTask(db: SupabaseClient, id: string): Promise<Task | null> {
   const { data, error } = await db.from("tasks")
     .update({ status: "done", completed_at: new Date().toISOString() })
-    .eq("id", id).select("*").single();
-  return rowToTask(must(data, error));
+    .eq("id", id).eq("status", "open").select("*").maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? rowToTask(data) : null;
 }
 
 export async function reopenTask(db: SupabaseClient, id: string): Promise<void> {
@@ -109,11 +119,17 @@ export async function deleteTask(db: SupabaseClient, id: string): Promise<void> 
 
 export async function listRecentActivities(
   db: SupabaseClient, limit = 10,
-): Promise<(Activity & { businessName: string })[]> {
+): Promise<(Activity & { businessName: string | null })[]> {
   const { data, error } = await db.from("activities").select("*, businesses(name)")
     .order("created_at", { ascending: false }).limit(limit);
+  // activities.business_id is NOT NULL with ON DELETE CASCADE, so this join
+  // should never actually miss — but map a missing business to null (not
+  // ""), matching listAllTasks above, so the two helpers agree on what "no
+  // business" looks like. A stray "" would still be a truthy-looking string
+  // to a careless caller and render as an unlabeled link; null forces the
+  // caller to handle the absence explicitly.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return must(data, error).map((r: any) => ({
-    ...rowToActivity(r), businessName: r.businesses?.name ?? "",
+    ...rowToActivity(r), businessName: r.businesses?.name ?? null,
   }));
 }

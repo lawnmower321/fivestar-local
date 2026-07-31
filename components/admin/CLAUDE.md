@@ -35,7 +35,9 @@ MAP
 - task-form.tsx — controlled add-task form (title/due date/assignee, +client
   picker when businessId isn't fixed); controlled state throughout (not
   useRef+reset) so a returned {error} doesn't render over an emptied form;
-  renders createTaskAction's {error} inline.
+  renders createTaskAction's {error} inline AND catches a thrown rejection
+  (e.g. requireUser() on an expired session, or a network failure) the same
+  way, so either failure mode surfaces without losing the typed title.
 - task-item.tsx — checkbox (setTaskStatusAction) + delete (X, deleteTaskAction)
   per task row; checked state is driven by the server-fetched task prop, not
   optimistic local state, so a thrown action leaves it exactly where server

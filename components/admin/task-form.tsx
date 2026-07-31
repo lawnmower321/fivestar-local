@@ -30,20 +30,30 @@ export function TaskForm({ businessId, profiles, businesses }: {
           return;
         }
         startTransition(async () => {
-          const result = await createTaskAction({
-            businessId: businessId ?? selectedBusinessId,
-            title: trimmed,
-            dueDate,
-            assignee,
-          });
-          if (result?.error) {
-            setError(result.error);
-          } else {
-            setError(null);
-            setTitle("");
-            setSelectedBusinessId("");
-            setDueDate("");
-            setAssignee("");
+          try {
+            const result = await createTaskAction({
+              businessId: businessId ?? selectedBusinessId,
+              title: trimmed,
+              dueDate,
+              assignee,
+            });
+            if (result?.error) {
+              setError(result.error);
+            } else {
+              setError(null);
+              setTitle("");
+              setSelectedBusinessId("");
+              setDueDate("");
+              setAssignee("");
+            }
+          } catch (e) {
+            // requireUser() throws (doesn't redirect) on an expired session,
+            // and this runs before createTaskAction's own try/catch even
+            // starts — same for a network failure. Without this catch the
+            // rejection would escape the transition to the nearest error
+            // boundary, losing the page AND the title state above. Mirrors
+            // task-item.tsx's catch.
+            setError(e instanceof Error ? e.message : "Create failed — try again.");
           }
         });
       }}

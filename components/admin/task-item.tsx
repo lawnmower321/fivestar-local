@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { setTaskStatusAction, deleteTaskAction } from "@/app/admin/actions";
+import { formatDueDate } from "@/lib/crm/dates";
 import type { Task } from "@/lib/crm/types";
 
 // checked={done} is driven straight off the server-fetched `task` prop, not
@@ -58,7 +59,7 @@ export function TaskItem({ task, businessName, assigneeName, overdue }: {
               <>
                 {" · "}
                 <span className={overdue && !done ? "font-medium text-gred" : undefined}>
-                  due {task.dueDate}
+                  due {formatDueDate(task.dueDate)}
                 </span>
               </>
             )}

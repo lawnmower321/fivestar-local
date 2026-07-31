@@ -202,3 +202,25 @@ leaves that entry (history is fact) and writes nothing. Due-date math runs in
 America/New_York via lib/crm/dates (todayInTimeZone); dashboard = today +
 overdue only; undated tasks live in /admin/tasks' Anytime section. /admin is
 now the today-dashboard, replacing the Phase-2 redirect.
+
+## 2026-07-31 — Phase 4 fix wave: real completeTask transition, revalidation ordering
+Whole-branch review of Phase 4 found three seam-level bugs, all fixed together
+(no second wave planned). (1) completeTask now only writes/returns a row when
+`.eq("status","open")` actually matched (maybeSingle, so already-done returns
+null instead of an unconditional single()) — completing an already-done task
+(reopen→complete cycles, two founders racing the same task, or the checkbox
+bug below) no longer inserts a second permanent task_completed activity.
+(2) setTaskStatusAction now calls revalidateTaskSurfaces immediately after
+completeTask succeeds, BEFORE the task_completed insertActivity call, so a
+failing activity write (which still throws — that propagation is
+intentional) can no longer leave the checkbox showing unchecked against a
+task that is actually done in the database. (3) TaskForm's createTaskAction
+call is now wrapped in try/catch, matching TaskItem's existing pattern —
+requireUser() throws rather than redirecting on an expired session, and that
+rejection was escaping the transition to the nearest error boundary,
+losing the page and the typed title. Also: listRecentActivities now maps a
+missing joined business to null (was ""), matching listAllTasks, so the two
+helpers agree and a renderer can't mistake an empty string for real data;
+and due dates render via the new lib/crm/dates.formatDueDate (string-part
+parsing, not `new Date(str).toLocaleDateString()`, which would reintroduce
+the UTC-shift bug this file exists to prevent).

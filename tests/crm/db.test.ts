@@ -124,7 +124,7 @@ describe("listTasksForBusiness", () => {
 });
 
 describe("completeTask", () => {
-  it("updates status+completed_at and returns the mapped row", async () => {
+  it("updates status+completed_at, requires the row was open, and returns the mapped row on a real transition", async () => {
     const row = {
       id: "t1", business_id: "biz-1", assignee: null, title: "Send invoice",
       due_date: null, status: "done", created_by: null,
@@ -136,8 +136,16 @@ describe("completeTask", () => {
     expect((update?.args[0] as { status: string }).status).toBe("done");
     expect((update?.args[0] as { completed_at: string }).completed_at).toBeTruthy();
     expect(calls).toContainEqual({ method: "eq", args: ["id", "t1"] });
-    expect(out.businessId).toBe("biz-1");
-    expect(out.title).toBe("Send invoice");
+    expect(calls).toContainEqual({ method: "eq", args: ["status", "open"] });
+    expect(calls.some((c) => c.method === "maybeSingle")).toBe(true);
+    expect(out?.businessId).toBe("biz-1");
+    expect(out?.title).toBe("Send invoice");
+  });
+
+  it("returns null (no row matched) when the task was already done — a no-op, not an error", async () => {
+    const { db } = fakeDb({ data: null });
+    const out = await completeTask(db, "t1");
+    expect(out).toBeNull();
   });
 
   it("throws the Supabase error message instead of silently no-oping", async () => {
@@ -195,5 +203,15 @@ describe("listRecentActivities", () => {
     expect(out[0].type).toBe("note");
     expect(calls).toContainEqual({ method: "order", args: ["created_at", { ascending: false }] });
     expect(calls).toContainEqual({ method: "limit", args: [10] });
+  });
+
+  it("maps a missing joined business to null, matching listAllTasks (not '')", async () => {
+    const rows = [{
+      id: "a1", business_id: "biz-1", user_id: "u1", type: "note", body: "hi",
+      metadata: null, created_at: "2026-07-31T12:00:00Z", businesses: null,
+    }];
+    const { db } = fakeDb({ data: rows });
+    const out = await listRecentActivities(db);
+    expect(out[0].businessName).toBeNull();
   });
 });
