@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getDb, createBusiness, getBusiness, updateBusiness, insertReview, markPosted, recentPostedReplies, deleteBusiness } from "@/lib/replydesk/db";
+import {
+  getDb, createBusiness, getBusiness, updateBusiness, insertReview, markPosted,
+  recentPostedReplies, deleteBusiness, getPendingStatusChange, setStatusWithPending,
+  clearPendingStatusChange,
+} from "@/lib/replydesk/db";
 import { getOpenRouter } from "@/lib/replydesk/ai/client";
 import { generateReply } from "@/lib/replydesk/ai/generate-reply";
 import { buildKnowledgebase } from "@/lib/replydesk/ai/build-knowledgebase";
@@ -158,23 +162,43 @@ export async function updateClientDetailsAction(
   const input = updateClientSchema.parse({ businessId, ...details });
   const db = getDb();
   let before: Awaited<ReturnType<typeof getBusiness>>;
+  let pendingBefore: Awaited<ReturnType<typeof getPendingStatusChange>>;
   try {
     before = await getBusiness(db, input.businessId);
+    pendingBefore = await getPendingStatusChange(db, input.businessId);
     await updateBusiness(db, input.businessId, {
-      status: input.status,
       contactName: input.contactName,
       contactEmail: input.contactEmail,
       contactPhone: input.contactPhone,
       reviewUrl: input.reviewUrl,
     });
+    if (before.status !== input.status) {
+      // Chain from the oldest unflushed transition (if any) rather than
+      // `before.status`, so re-picking a status before the prior activity
+      // write succeeds doesn't drop the earlier, still-unrecorded change.
+      const from = pendingBefore?.from ?? before.status;
+      await setStatusWithPending(db, input.businessId, from, input.status);
+    }
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Save failed — try again." };
   }
-  if (before.status !== input.status) {
-    await insertActivity(db, {
-      businessId: input.businessId, userId: user.id,
-      type: "status_change", metadata: { from: before.status, to: input.status },
-    });
+  // Whatever transition is now outstanding — from this call or a previous
+  // one whose activity write failed — gets flushed here. A failure here
+  // still propagates (writer failures are loud), but the marker persists
+  // in the DB until the write succeeds, so nothing is lost on retry.
+  const pendingAfter = await getPendingStatusChange(db, input.businessId);
+  if (pendingAfter) {
+    // from === to only when a prior unflushed transition got chained back to
+    // its own starting status (e.g. A -> B failed to log, then this call
+    // moves it back to A) — net change is nothing, so there's no activity
+    // to record, just a stale marker to drop.
+    if (pendingAfter.from !== pendingAfter.to) {
+      await insertActivity(db, {
+        businessId: input.businessId, userId: user.id,
+        type: "status_change", metadata: { from: pendingAfter.from, to: pendingAfter.to },
+      });
+    }
+    await clearPendingStatusChange(db, input.businessId);
   }
   revalidatePath(`/admin/clients/${input.businessId}`, "layout");
 }
