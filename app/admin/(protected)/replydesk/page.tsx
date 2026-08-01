@@ -4,7 +4,7 @@ import { buildAttention } from "@/lib/crm/attention";
 
 export const dynamic = "force-dynamic";
 
-export default async function ReplyDeskDashboard() {
+export default async function ReplyQueuePage() {
   const db = getDb();
   const businesses = await listBusinesses(db);
   const active = businesses.filter((b) => b.status === "active").map((b) => ({ id: b.id, name: b.name }));
@@ -15,7 +15,7 @@ export default async function ReplyDeskDashboard() {
   const attention = buildAttention(active, reviewMeta, new Date());
   return (
     <div className="max-w-3xl space-y-8">
-      <h1 className="font-heading text-2xl font-bold text-slate-900">ReplyDesk</h1>
+      <h1 className="font-heading text-2xl font-bold text-slate-900">Reply queue</h1>
 
       <section>
         <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-400">

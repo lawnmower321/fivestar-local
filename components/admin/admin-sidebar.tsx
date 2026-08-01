@@ -10,12 +10,14 @@ import {
 } from "@/components/ui/sidebar";
 
 // App-shell nav. Entries appear when their phase ships (Phase 2: Clients;
-// Phase 4: Dashboard, Tasks; Phase 5: ReplyDesk). Dashboard uses an exact
+// Phase 4: Dashboard, Tasks; Phase 5: Reply queue). Dashboard uses an exact
 // pathname match so it isn't highlighted on every /admin/* page;
-// Clients/Tasks/ReplyDesk use prefix match (the ReplyDesk prefix is
-// "/admin/replydesk", distinct from the per-client tab under
+// Clients/Tasks/Reply queue use prefix match (the Reply queue prefix is
+// "/admin/replydesk", distinct from the per-client ReplyDesk tab under
 // "/admin/clients/[id]/replydesk", so neither entry lights up for the
-// other's route).
+// other's route). "Reply queue" is deliberately not "ReplyDesk" — that name
+// is reserved for the actual per-client reply workspace (client-tabs.tsx);
+// this entry is the read-only cross-client dashboard over it.
 export function AdminSidebar() {
   const pathname = usePathname();
   return (
@@ -65,7 +67,7 @@ export function AdminSidebar() {
                   render={<Link href="/admin/replydesk" />}
                 >
                   <MessagesSquare />
-                  <span>ReplyDesk</span>
+                  <span>Reply queue</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
