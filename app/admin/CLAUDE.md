@@ -37,10 +37,12 @@ MAP
   TaskForm/TaskItem/bucketTasks as the per-client tasks tab, but over
   listAllTasks with a client picker (listBusinesses) instead of a fixed
   businessId.
-- (protected)/replydesk/page.tsx — cross-client ReplyDesk dashboard: recent
-  posted replies (recentPostedAcrossClients, 20, joined business names) +
-  a "needs attention" list (lib/crm/attention.buildAttention) for ACTIVE
-  clients only. Read-only — no server actions.
+- (protected)/replydesk/page.tsx — "Reply queue" cross-client dashboard
+  (sidebar label; the route itself is unchanged): recent posted replies
+  (recentPostedAcrossClients, 20, joined business names) + a "needs
+  attention" list (lib/crm/attention.buildAttention) for ACTIVE clients
+  only, each linking to that client's actual ReplyDesk tab. Read-only — no
+  server actions.
 - (protected)/clients/page.tsx — client list: status filter chips, table,
   add-client form.
 - (protected)/clients/[id]/layout.tsx — client header (name, status badge,

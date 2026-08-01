@@ -16,11 +16,14 @@ MAP
   the Overview page hides it for non-leads and deleteBusinessAction refuses
   them server-side.
 - admin-sidebar.tsx — shadcn sidebar nav (Dashboard, Clients, Tasks,
-  ReplyDesk + logout); active state via usePathname (Dashboard: exact match
+  Reply queue + logout); active state via usePathname (Dashboard: exact match
   on /admin so it isn't active on every /admin/* page; Clients/Tasks/
-  ReplyDesk: prefix match — the /admin/replydesk prefix is distinct from the
+  Reply queue: prefix match — the /admin/replydesk prefix is distinct from the
   per-client /admin/clients/[id]/replydesk tab, so neither lights up for the
-  other's route). New entries appear as phases ship.
+  other's route). New entries appear as phases ship. Labeled "Reply queue",
+  not "ReplyDesk" — that name is reserved for the actual per-client reply
+  workspace (client-tabs.tsx); this sidebar entry is the read-only
+  cross-client dashboard over it.
 - activity-icons.ts — ACTIVITY_ICONS: one lucide icon per ActivityType,
   shared by the client Timeline tab and the /admin dashboard's recent
   activity list so the same activity data renders identically in both.

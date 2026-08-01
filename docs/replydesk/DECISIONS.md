@@ -260,3 +260,31 @@ icon on this branch. (6) lib/crm/CLAUDE.md's timestamp-comparison invariant
 now notes it applies to timestamptz columns only — due_date is a Postgres
 date column (bare YYYY-MM-DD, no offset), so dates.ts/tasks.ts's string
 comparisons there are correct, not a violation.
+
+## 2026-08-01 — Post-merge cleanup: status_change reconciliation, review-meta cap, a11y parity, sidebar rename
+Four items parked at the end of phases 3–5 were closed out. (1) The
+status_change retry-loss bug (Phase 3 whole-branch review): a failed
+insertActivity after a successful status update was permanently unrecoverable
+on retry, since the retry re-reads the already-updated status and sees no
+change. Fixed with a new nullable `businesses.pending_status_change` jsonb
+column (migration 0006) — updateClientDetailsAction now writes it atomically
+with the status column (same UPDATE statement) via
+setStatusWithPending(db, id, from, to), and flushes whatever is outstanding
+(this call's or an earlier failed call's) via
+getPendingStatusChange/clearPendingStatusChange after the primary writes
+succeed. A subsequent activity-write failure still propagates loudly, but the
+marker persists until the write succeeds, so the transition is never lost —
+chosen over a Postgres stored procedure/transaction specifically to keep the
+fix in pure, DI-tested TS rather than introducing DB-side logic. updateBusiness
+no longer accepts a `status` patch field, so every status write goes through
+the pending-tracked path. (2) listReviewMeta now caps at
+REVIEW_META_ROW_CAP=1000 rows (lib/replydesk/db.ts) — the ordering fix alone
+left the table free to grow unbounded as an audit trail; the cap is generous
+enough that it isn't expected to bind against realistic review + draft volume.
+(3) components/admin/reply-workspace.tsx's posted-reviews log had the same
+bare "★".repeat() a11y bug already fixed on /admin/replydesk — same
+role="img" + aria-hidden pattern applied here. (4) The sidebar's cross-client
+dashboard is relabeled "Reply queue" (admin-sidebar.tsx, and the page's own
+h1) — "ReplyDesk" now names only the actual per-client reply workspace
+(client-tabs.tsx), removing the naming collision the Phase 5 review flagged;
+the route itself (/admin/replydesk) is unchanged.
