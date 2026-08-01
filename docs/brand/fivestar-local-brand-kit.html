@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FiveStar Local — Brand Kit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Geist:wght@400;500;600&display=swap');
+
+  /* ————— Tokens (the brand) ————— */
+  :root {
+    --cobalt: #2749d6;   /* primary — CTAs, links, brand chrome, ripple */
+    --honey:  #e8a317;   /* stars, accents, highlights */
+    --ink:    #0f1b3d;   /* headlines, dark surfaces */
+    --slate:  #5b6b83;   /* secondary text */
+    --cloud:  #f7f9fc;   /* page + card backgrounds */
+    --white:  #ffffff;
+    --line:   #e4e9f1;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--cloud); color: var(--ink);
+    font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+    font-size: 16px; line-height: 1.6;
+  }
+  h1, h2, h3, .display { font-family: "Bricolage Grotesque", "Geist", sans-serif; }
+  main { max-width: 880px; margin: 0 auto; padding: 56px 24px 80px; }
+
+  .kicker {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--slate);
+  }
+  header.masthead { padding: 24px 0 48px; border-bottom: 1px solid var(--line); }
+  header.masthead h1 {
+    font-size: clamp(40px, 7vw, 64px); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 1.05; margin: 10px 0 8px;
+    text-wrap: balance;
+  }
+  header.masthead h1 .five { color: var(--cobalt); }
+  header.masthead p { color: var(--slate); max-width: 56ch; margin: 0; }
+
+  section { padding: 48px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: none; }
+  .sec-label {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--cobalt); margin-bottom: 20px;
+  }
+
+  /* 01 — Color */
+  .swatch-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+  .swatch { border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--white); }
+  .swatch .chip { height: 130px; }
+  .swatch .meta { padding: 12px 14px; }
+  .swatch .name { font-weight: 600; font-size: 14px; }
+  .swatch .hex { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--slate); }
+  .swatch .use { font-size: 12px; color: var(--slate); margin-top: 6px; line-height: 1.45; }
+  .color-note {
+    margin-top: 18px; font-size: 13px; color: var(--slate);
+    border-left: 3px solid var(--honey); padding-left: 14px; max-width: 68ch;
+  }
+
+  /* 02 — Type */
+  .specimen { background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 28px; margin-bottom: 14px; }
+  .specimen .display {
+    font-size: clamp(34px, 5vw, 52px); font-weight: 800; letter-spacing: -0.03em;
+    line-height: 1.08; margin: 0 0 6px; text-wrap: balance;
+  }
+  .specimen .facelabel { font-size: 12px; color: var(--slate); margin-top: 12px; }
+  .specimen p.body-sample { max-width: 62ch; margin: 0; }
+  .scale { display: grid; gap: 0; background: var(--white); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .scale .row { display: flex; align-items: baseline; gap: 18px; padding: 14px 22px; border-bottom: 1px solid var(--line); }
+  .scale .row:last-child { border-bottom: none; }
+  .scale .tag { width: 76px; flex-shrink: 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); }
+
+  /* 03 — Wordmark */
+  .marks { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .mark-card {
+    border-radius: 12px; border: 1px solid var(--line);
+    padding: 40px 24px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px; min-height: 170px;
+  }
+  .mark-card .cap { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .wordmark { display: flex; align-items: center; gap: 12px; }
+  .wordmark .text { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 26px; letter-spacing: -0.02em; white-space: nowrap; }
+  .mark-note { margin-top: 18px; font-size: 13px; color: var(--slate); max-width: 68ch; }
+
+  /* 04 — UI */
+  .ui-board { background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 28px; display: flex; flex-direction: column; gap: 22px; }
+  .ui-group { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .ui-cap { width: 100px; flex-shrink: 0; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); }
+  .btn { font-family: "Geist", sans-serif; font-size: 14px; font-weight: 600; border-radius: 999px; padding: 10px 22px; border: 1.5px solid transparent; cursor: pointer; }
+  .btn.primary { background: var(--cobalt); color: var(--white); }
+  .btn.secondary { background: transparent; color: var(--cobalt); border-color: var(--cobalt); }
+  .btn.ghost { background: transparent; color: var(--slate); }
+  .btn:focus-visible { outline: 2px solid var(--honey); outline-offset: 2px; }
+  .pill { font-size: 12px; font-weight: 500; border-radius: 999px; padding: 4px 12px; }
+  .pill.cobalt { background: #2749d61a; color: var(--cobalt); }
+  .pill.honey { background: #e8a3171f; color: #9c6d0a; }
+  .pill.ink { background: var(--ink); color: var(--cloud); }
+  .stars { color: var(--honey); font-size: 20px; letter-spacing: 3px; }
+  .ripple-demo { position: relative; width: 44px; height: 44px; }
+  .ripple-demo .core { position: absolute; inset: 12px; border-radius: 999px; background: var(--cobalt); }
+  .ripple-demo .ring { position: absolute; inset: 0; border-radius: 999px; border: 2px solid var(--cobalt); animation: ripple 2.4s ease-out infinite; }
+  @keyframes ripple { 0% { transform: scale(0.6); opacity: 0.7; } 100% { transform: scale(1.35); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .ripple-demo .ring { animation: none; opacity: 0.4; } }
+
+  /* 05 — Voice */
+  .voice { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .voice { grid-template-columns: 1fr; } }
+  .voice .col { background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 24px; }
+  .voice h3 { margin: 0 0 14px; font-size: 15px; letter-spacing: 0.02em; }
+  .voice .do h3 { color: var(--cobalt); }
+  .voice .dont h3 { color: #b4540a; }
+  .voice ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+  .voice li { font-size: 14px; padding-left: 22px; position: relative; color: var(--ink); }
+  .voice .do li::before { content: "✓"; position: absolute; left: 0; color: var(--cobalt); font-weight: 700; }
+  .voice .dont li::before { content: "✕"; position: absolute; left: 0; color: #b4540a; font-weight: 700; }
+
+  footer.colophon { padding-top: 36px; font-size: 12px; color: var(--slate); }
+</style>
+</head>
+<body>
+<main>
+
+  <header class="masthead">
+    <div class="kicker">Brand Kit · Version 1.0</div>
+    <h1><span class="five">FiveStar</span> Local</h1>
+    <p>Turn happy customers into 5-star Google reviews — with one tap. The visual system
+    for everything FiveStar Local owns: the site's own chrome, cards and stands, social,
+    and the internal console.</p>
+  </header>
+
+  <section>
+    <div class="sec-label">01 — Color Palette · “Cobalt &amp; Honey”</div>
+    <div class="swatch-row">
+      <div class="swatch"><div class="chip" style="background:#2749d6"></div>
+        <div class="meta"><div class="name">Cobalt</div><div class="hex">#2749d6</div>
+        <div class="use">Primary. CTAs, links, the tap-ripple, brand chrome. The trustworthy tech-blue — deeper and unmistakably not Google's azure.</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#e8a317"></div>
+        <div class="meta"><div class="name">Honey</div><div class="hex">#e8a317</div>
+        <div class="use">Stars, highlights, focus rings. The color of a 5-star row. Use sparingly — it should always mean “review” or “attention.”</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#0f1b3d"></div>
+        <div class="meta"><div class="name">Ink</div><div class="hex">#0f1b3d</div>
+        <div class="use">Headlines, dark sections, footers. A navy-cast near-black that keeps the page warm-cool rather than dead grey.</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#5b6b83"></div>
+        <div class="meta"><div class="name">Slate</div><div class="hex">#5b6b83</div>
+        <div class="use">Secondary text, captions, metadata. Continues the site's existing slate neutrals.</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#f7f9fc; border-bottom:1px solid var(--line)"></div>
+        <div class="meta"><div class="name">Cloud</div><div class="hex">#f7f9fc</div>
+        <div class="use">Page and card backgrounds. White (#ffffff) sits on top of it for raised surfaces.</div></div></div>
+    </div>
+    <p class="color-note">
+      Google's palette (#4285f4 / #34a853 / #fbbc05 / #ea4335) appears <strong>only</strong>
+      inside components that depict real Google UI — the review-showcase, scan-showcase, and
+      tap-demo simulations. Never in FiveStar Local's own chrome, print, or packaging.
+    </p>
+  </section>
+
+  <section>
+    <div class="sec-label">02 — Typography</div>
+    <div class="specimen">
+      <div class="display">Tap. Review. Done in fifteen seconds.</div>
+      <div class="facelabel">Display &amp; headings — Bricolage Grotesque · 600–800 · tight tracking (−0.02 to −0.03em)</div>
+    </div>
+    <div class="specimen">
+      <p class="body-sample">A small card on your counter. Your customer taps it with their phone,
+      your Google review page opens, and the review happens before they're out the door.
+      We come to you and set the whole thing up while you watch.</p>
+      <div class="facelabel">Body — Geist · 400/500 · 1.6 line height · max 65ch measure</div>
+    </div>
+    <div class="scale">
+      <div class="row"><span class="tag">Display</span><span class="display" style="font-size:44px; font-weight:800;">Aa 44–64px</span></div>
+      <div class="row"><span class="tag">Heading</span><span class="display" style="font-size:28px; font-weight:700;">Aa 28px</span></div>
+      <div class="row"><span class="tag">Subhead</span><span class="display" style="font-size:20px; font-weight:600;">Aa 20px</span></div>
+      <div class="row"><span class="tag">Body</span><span style="font-size:16px;">Aa 16px</span></div>
+      <div class="row"><span class="tag">Label</span><span style="font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--slate);">Aa 12px caps</span></div>
+      <div class="row"><span class="tag">Caption</span><span style="font-size:12px; color:var(--slate);">Aa 12px</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">03 — Wordmark</div>
+    <div class="marks">
+      <div class="mark-card" style="background:var(--white);">
+        <div class="wordmark">
+          <svg width="40" height="40" viewBox="0 0 40 40" role="img" aria-label="FiveStar Local mark — star with tap ripple">
+            <path d="M13 27.5 L15.1 20.1 L9.4 15.4 L16.9 15.2 L13 8 L19 12.6 L25 8 L21.1 15.2 L28.6 15.4 L22.9 20.1 L25 27.5 L19 23.2 Z"
+                  transform="translate(-4 6) scale(0.92)" fill="#e8a317"/>
+            <path d="M22 8 A 14 14 0 0 1 32 18" fill="none" stroke="#2749d6" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M24 2.5 A 20 20 0 0 1 37.5 16" fill="none" stroke="#2749d6" stroke-width="2.6" stroke-linecap="round" opacity="0.55"/>
+          </svg>
+          <span class="text" style="color:var(--ink);"><span style="color:var(--cobalt);">FiveStar</span> Local</span>
+        </div>
+        <div class="cap" style="color:var(--slate);">Primary — on light</div>
+      </div>
+      <div class="mark-card" style="background:var(--ink);">
+        <div class="wordmark">
+          <svg width="40" height="40" viewBox="0 0 40 40" role="img" aria-label="FiveStar Local mark, reversed">
+            <path d="M13 27.5 L15.1 20.1 L9.4 15.4 L16.9 15.2 L13 8 L19 12.6 L25 8 L21.1 15.2 L28.6 15.4 L22.9 20.1 L25 27.5 L19 23.2 Z"
+                  transform="translate(-4 6) scale(0.92)" fill="#e8a317"/>
+            <path d="M22 8 A 14 14 0 0 1 32 18" fill="none" stroke="#f7f9fc" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M24 2.5 A 20 20 0 0 1 37.5 16" fill="none" stroke="#f7f9fc" stroke-width="2.6" stroke-linecap="round" opacity="0.55"/>
+          </svg>
+          <span class="text" style="color:var(--cloud);">FiveStar Local</span>
+        </div>
+        <div class="cap" style="color:#8fa0c0;">Reversed — on ink</div>
+      </div>
+      <div class="mark-card" style="background:var(--cobalt);">
+        <div class="wordmark">
+          <svg width="40" height="40" viewBox="0 0 40 40" role="img" aria-label="FiveStar Local mark, on cobalt">
+            <path d="M13 27.5 L15.1 20.1 L9.4 15.4 L16.9 15.2 L13 8 L19 12.6 L25 8 L21.1 15.2 L28.6 15.4 L22.9 20.1 L25 27.5 L19 23.2 Z"
+                  transform="translate(-4 6) scale(0.92)" fill="#e8a317"/>
+            <path d="M22 8 A 14 14 0 0 1 32 18" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M24 2.5 A 20 20 0 0 1 37.5 16" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" opacity="0.6"/>
+          </svg>
+          <span class="text" style="color:#ffffff;">FiveStar Local</span>
+        </div>
+        <div class="cap" style="color:#bcC9f2;">Accent — on cobalt</div>
+      </div>
+    </div>
+    <p class="mark-note">
+      The mark is a honey star sending out the NFC tap-ripple — the two things the product is:
+      five stars, one tap. “FiveStar” takes cobalt in the primary treatment; single-color
+      treatments set the whole wordmark in one ink and keep the star honey wherever possible.
+    </p>
+  </section>
+
+  <section>
+    <div class="sec-label">04 — UI Components</div>
+    <div class="ui-board">
+      <div class="ui-group"><span class="ui-cap">Buttons</span>
+        <button class="btn primary" type="button">Get your cards</button>
+        <button class="btn secondary" type="button">See how it works</button>
+        <button class="btn ghost" type="button">Learn more</button>
+      </div>
+      <div class="ui-group"><span class="ui-cap">Pills</span>
+        <span class="pill cobalt">NFC installed in person</span>
+        <span class="pill honey">★ 4.9 average</span>
+        <span class="pill ink">Growth plan</span>
+      </div>
+      <div class="ui-group"><span class="ui-cap">Stars</span>
+        <span class="stars" role="img" aria-label="5 stars">★★★★★</span>
+        <span style="font-size:13px; color:var(--slate);">Honey #e8a317, never Google yellow</span>
+      </div>
+      <div class="ui-group"><span class="ui-cap">Tap ripple</span>
+        <span class="ripple-demo"><span class="ring"></span><span class="core"></span></span>
+        <span style="font-size:13px; color:var(--slate);">Cobalt rings, 2.4s ease-out — the brand's signature motion</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">05 — Voice &amp; Tone</div>
+    <div class="voice">
+      <div class="col do">
+        <h3>Do</h3>
+        <ul>
+          <li>Speak plainly — “tap the card, leave a review.”</li>
+          <li>Lead with what happens, in order, in seconds.</li>
+          <li>Name real outcomes: more reviews, higher on the map, more walk-ins.</li>
+          <li>Be the people who show up — “we install it while you watch.”</li>
+          <li>Make promises concrete: fifteen seconds, before they're out the door.</li>
+          <li>Sound like a neighbor who happens to be good at this.</li>
+        </ul>
+      </div>
+      <div class="col dont">
+        <h3>Don't</h3>
+        <ul>
+          <li>Use marketing superlatives — “revolutionary,” “game-changing.”</li>
+          <li>Reach for jargon — “omnichannel reputation management.”</li>
+          <li>Imply Google affiliation, in words or in color.</li>
+          <li>Overpromise rankings or guarantee outcomes.</li>
+          <li>Talk down to non-technical owners.</li>
+          <li>Hide the price or bury the ask.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    FiveStar Local · Brand Kit · Version 1.0 · 2026 · Confidential
+  </footer>
+
+</main>
+</body>
+</html>
