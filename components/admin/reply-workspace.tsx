@@ -101,7 +101,12 @@ export function ReplyWorkspace({ business, reviews }: { business: Business; revi
         {reviews.map((r) => (
           <li key={r.id} className="py-3">
             <div className="flex items-center justify-between text-xs text-slate-500">
-              <span>{"★".repeat(r.rating)}{r.reviewer ? ` · ${r.reviewer}` : ""}</span>
+              <span>
+                <span role="img" aria-label={`${r.rating} stars`}>
+                  <span aria-hidden="true">{"★".repeat(r.rating)}</span>
+                </span>
+                {r.reviewer ? ` · ${r.reviewer}` : ""}
+              </span>
               <span className={r.status === "posted" ? "text-ggreen" : "text-slate-400"}>{r.status}</span>
             </div>
             <p className="mt-1 line-clamp-2 text-sm text-slate-700">{r.reviewText}</p>
