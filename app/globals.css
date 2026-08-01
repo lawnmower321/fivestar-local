@@ -130,6 +130,15 @@
 }
 
 @theme {
+  /* FiveStar Local owned brand — docs/brand.md ("Cobalt & Honey"). Use these
+     for everything FiveStar owns: site chrome, buttons, links, the ripple. */
+  --color-brand: #2749d6; /* cobalt — primary actions, links, ripple */
+  --color-star: #e8a317;  /* honey — stars, highlights */
+  --color-ink: #0f1b3d;   /* navy-black — headlines, dark accents */
+
+  /* Google's trademark palette — ONLY for components that depict real
+     Google UI (review-showcase, scan-showcase, tap-demo). Never in
+     FiveStar's own chrome (docs/brand.md trademark rule). */
   --color-gblue: #4285f4;
   --color-ggreen: #34a853;
   --color-gyellow: #fbbc05;
@@ -145,7 +154,7 @@
   position: absolute;
   inset: 0;
   border-radius: 9999px;
-  border: 2px solid #4285f4;
+  border: 2px solid var(--color-brand);
   animation: nfc-ripple 2.4s ease-out infinite;
 }
 

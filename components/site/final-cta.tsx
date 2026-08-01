@@ -25,7 +25,7 @@ export function FinalCta() {
           render={<a href={`mailto:${content.site.email}?subject=${encodeURIComponent("Set up my business")}`} />}
           nativeButton={false}
           size="lg"
-          className="mt-8 bg-gblue text-white hover:bg-gblue/90"
+          className="mt-8 bg-brand text-white hover:bg-brand/90"
         >
           {content.finalCta.cta}
         </Button>

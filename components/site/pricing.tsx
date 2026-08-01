@@ -40,11 +40,11 @@ export function Pricing() {
                     </p>
                     <div className="mt-1 flex gap-0.5">
                       {Array.from({ length: 5 }).map((_, s) => (
-                        <Star key={s} size={13} className="fill-gyellow text-gyellow" />
+                        <Star key={s} size={13} className="fill-star text-star" />
                       ))}
                     </div>
                   </div>
-                  <Nfc size={26} className={dark ? "text-gblue" : "text-slate-300"} />
+                  <Nfc size={26} className={dark ? "text-brand" : "text-slate-300"} />
                 </div>
 
                 <div className="mt-7 flex items-baseline gap-2">
@@ -60,8 +60,8 @@ export function Pricing() {
                 <ul className="mt-7 flex-1 space-y-3">
                   {tier.features.map((f) => (
                     <li key={f} className="flex items-start gap-3">
-                      <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${dark ? "bg-ggreen/20" : "bg-ggreen/10"}`}>
-                        <Check size={13} className="text-ggreen" strokeWidth={3} />
+                      <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${dark ? "bg-star/20" : "bg-brand/10"}`}>
+                        <Check size={13} className={dark ? "text-star" : "text-brand"} strokeWidth={3} />
                       </span>
                       <span className={`text-sm ${dark ? "text-slate-300" : "text-slate-700"}`}>{f}</span>
                     </li>
@@ -74,7 +74,7 @@ export function Pricing() {
                   size="lg"
                   className={
                     dark
-                      ? "mt-8 w-full bg-gblue text-white hover:bg-gblue/90"
+                      ? "mt-8 w-full bg-brand text-white hover:bg-brand/90"
                       : "mt-8 w-full border border-slate-300 bg-white text-slate-900 hover:bg-slate-50"
                   }
                 >

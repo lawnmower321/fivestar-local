@@ -3,7 +3,7 @@ import { Reveal } from "@/components/site/reveal";
 import { content } from "@/lib/content";
 
 const icons = [Nfc, MessageSquareText, TrendingUp];
-const iconColors = ["text-gblue bg-gblue/10", "text-ggreen bg-ggreen/10", "text-gred bg-gred/10"];
+const iconColors = ["text-brand bg-brand/10", "text-star bg-star/10", "text-ink bg-ink/10"];
 
 export function HowItWorks() {
   return (

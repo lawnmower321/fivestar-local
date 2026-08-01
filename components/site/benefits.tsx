@@ -16,8 +16,8 @@ export function WhatYouGet() {
           <ul className="divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
             {content.whatYouGet.items.map((item) => (
               <li key={item} className="flex items-start gap-3 px-5 py-4">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ggreen/10">
-                  <Check size={13} className="text-ggreen" strokeWidth={3} />
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/10">
+                  <Check size={13} className="text-brand" strokeWidth={3} />
                 </span>
                 <span className="text-slate-700">{item}</span>
               </li>

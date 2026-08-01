@@ -28,7 +28,7 @@ export function Hero() {
             className="mt-5 font-heading text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-[3.4rem] lg:leading-[1.05]"
           >
             {content.hero.headline}{" "}
-            <span className="text-gblue">{content.hero.highlight}</span>
+            <span className="text-brand">{content.hero.highlight}</span>
           </motion.h1>
           <motion.p {...fade(0.2)} className="mt-6 max-w-xl text-lg leading-relaxed text-slate-600">
             {content.hero.subhead}
@@ -38,7 +38,7 @@ export function Hero() {
               render={<a href="#pricing" />}
               nativeButton={false}
               size="lg"
-              className="bg-gblue text-white hover:bg-gblue/90"
+              className="bg-brand text-white hover:bg-brand/90"
             >
               {content.hero.cta}
             </Button>

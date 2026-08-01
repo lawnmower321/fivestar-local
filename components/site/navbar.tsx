@@ -12,8 +12,8 @@ export function Navbar() {
     <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-md">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="#" className="flex items-center gap-2 font-heading font-bold text-slate-900">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gblue">
-            <Star size={18} className="fill-gyellow text-gyellow" />
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand">
+            <Star size={18} className="fill-star text-star" />
           </span>
           {content.site.name}
         </Link>
@@ -22,7 +22,7 @@ export function Navbar() {
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm font-medium text-slate-600 transition-colors hover:text-gblue"
+              className="text-sm font-medium text-slate-600 transition-colors hover:text-brand"
             >
               {item.label}
             </Link>
@@ -30,7 +30,7 @@ export function Navbar() {
           <Button
             render={<a href="#pricing" />}
             nativeButton={false}
-            className="bg-gblue text-white hover:bg-gblue/90"
+            className="bg-brand text-white hover:bg-brand/90"
           >
             See pricing
           </Button>
@@ -58,7 +58,7 @@ export function Navbar() {
           <Button
             render={<a href="#pricing" />}
             nativeButton={false}
-            className="mt-2 w-full bg-gblue text-white hover:bg-gblue/90"
+            className="mt-2 w-full bg-brand text-white hover:bg-brand/90"
           >
             See pricing
           </Button>

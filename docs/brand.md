@@ -52,5 +52,9 @@ price. Full Do/Don't grid in the kit HTML.
   in-repo instead (user-directed, 2026-08-01).
 - B2 card print design: SKIPPED — purchasing pre-made NFC cards
   (user decision, 2026-08-01).
-- B3 site alignment: pending — swap own-chrome `gblue/gyellow/ggreen/gred`
-  usages to `--color-brand` (cobalt) / `--color-star` (honey) tokens.
+- B3 site alignment: DONE 2026-08-01 — own-chrome swapped to `--color-brand`
+  / `--color-star` / `--color-ink` tokens (navbar, hero, footer, pricing,
+  benefits, how-it-works, final-cta, nfc-card, `.nfc-ripple`). Google hexes
+  survive only in review-showcase / scan-showcase / tap-demo (verified by
+  grep). Admin console still uses the g* utility classes internally —
+  out of B3 scope, optional future cleanup.

@@ -24,11 +24,11 @@ export function NfcCard() {
             <p className="text-lg font-bold text-white">FiveStar Local</p>
             <div className="mt-1 flex gap-0.5">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} size={14} className="fill-gyellow text-gyellow" />
+                <Star key={i} size={14} className="fill-star text-star" />
               ))}
             </div>
           </div>
-          <Nfc className="text-gblue" size={28} />
+          <Nfc className="text-brand" size={28} />
         </div>
         <p className="absolute bottom-6 left-6 text-sm text-slate-400">
           Tap to review us on Google
