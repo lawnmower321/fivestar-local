@@ -46,3 +46,35 @@ export const updateClientSchema = z.object({
   contactPhone: optionalTrimmed,
   reviewUrl: z.string().trim().transform((s) => (HTTP_URL_RE.test(s) ? s : null)),
 });
+
+export const addNoteSchema = z.object({
+  businessId: z.uuid(),
+  body: z.string().trim().min(1),
+});
+
+export const deleteNoteSchema = z.object({
+  activityId: z.uuid(),
+  businessId: z.uuid(),
+});
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+// Empty form fields degrade to null (same convention as optionalTrimmed).
+const optionalUuid = z.string().trim().transform((s) => (s === "" ? null : s)).pipe(z.uuid().nullable());
+const optionalDate = z.string().trim().transform((s) => (s === "" ? null : s))
+  .pipe(z.string().regex(DATE_RE, "must be YYYY-MM-DD").nullable());
+
+export const createTaskSchema = z.object({
+  businessId: optionalUuid,
+  title: z.string().trim().min(1),
+  dueDate: optionalDate,
+  assignee: optionalUuid,
+});
+export const setTaskStatusSchema = z.object({
+  taskId: z.uuid(),
+  businessId: optionalUuid,
+  done: z.boolean(),
+});
+export const deleteTaskSchema = z.object({
+  taskId: z.uuid(),
+  businessId: optionalUuid,
+});

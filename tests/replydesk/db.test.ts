@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { deleteBusiness, countReviews, updateBusiness, getBusiness, findBusiness } from "@/lib/replydesk/db";
+import {
+  deleteBusiness, countReviews, updateBusiness, getBusiness, findBusiness,
+  recentPostedAcrossClients, listReviewMeta, getPendingStatusChange,
+  setStatusWithPending, clearPendingStatusChange,
+} from "@/lib/replydesk/db";
 
 type Call = { method: string; args: unknown[] };
 
@@ -12,7 +16,10 @@ function fakeDb(result: {
   const calls: Call[] = [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const builder: any = {};
-  for (const m of ["from", "delete", "select", "eq", "update", "single", "maybeSingle"]) {
+  for (const m of [
+    "from", "delete", "select", "eq", "update", "single", "maybeSingle",
+    "in", "not", "order", "limit", "insert",
+  ]) {
     builder[m] = (...args: unknown[]) => {
       calls.push({ method: m, args });
       return builder;
@@ -66,7 +73,6 @@ describe("updateBusiness", () => {
   it("maps camelCase patch fields to snake_case columns", async () => {
     const { db, calls } = fakeDb({ error: null });
     await updateBusiness(db, "biz-1", {
-      status: "active",
       contactName: "Sam",
       contactEmail: "sam@example.com",
       contactPhone: "555-1234",
@@ -74,7 +80,6 @@ describe("updateBusiness", () => {
     });
     const update = calls.find((c) => c.method === "update");
     expect(update?.args[0]).toEqual({
-      status: "active",
       contact_name: "Sam",
       contact_email: "sam@example.com",
       contact_phone: "555-1234",
@@ -88,6 +93,56 @@ describe("updateBusiness", () => {
     await updateBusiness(db, "biz-1", { kbMd: "# kb" });
     const update = calls.find((c) => c.method === "update");
     expect(update?.args[0]).toEqual({ kb_md: "# kb" });
+  });
+});
+
+describe("getPendingStatusChange", () => {
+  it("returns the pending transition when one is set", async () => {
+    const { db } = fakeDb({ data: { pending_status_change: { from: "lead", to: "active" } } });
+    expect(await getPendingStatusChange(db, "biz-1")).toEqual({ from: "lead", to: "active" });
+  });
+
+  it("returns null when nothing is outstanding", async () => {
+    const { db } = fakeDb({ data: { pending_status_change: null } });
+    expect(await getPendingStatusChange(db, "biz-1")).toBeNull();
+  });
+
+  it("throws the Supabase error message on failure", async () => {
+    const { db } = fakeDb({ error: { message: "select boom" } });
+    await expect(getPendingStatusChange(db, "biz-1")).rejects.toThrow("select boom");
+  });
+});
+
+describe("setStatusWithPending", () => {
+  it("writes status and pending_status_change in one update", async () => {
+    const { db, calls } = fakeDb({ error: null });
+    await setStatusWithPending(db, "biz-1", "lead", "active");
+    const update = calls.find((c) => c.method === "update");
+    expect(update?.args[0]).toEqual({
+      status: "active",
+      pending_status_change: { from: "lead", to: "active" },
+    });
+    expect(calls).toContainEqual({ method: "eq", args: ["id", "biz-1"] });
+  });
+
+  it("throws the Supabase error message on failure", async () => {
+    const { db } = fakeDb({ error: { message: "update boom" } });
+    await expect(setStatusWithPending(db, "biz-1", "lead", "active")).rejects.toThrow("update boom");
+  });
+});
+
+describe("clearPendingStatusChange", () => {
+  it("nulls out pending_status_change", async () => {
+    const { db, calls } = fakeDb({ error: null });
+    await clearPendingStatusChange(db, "biz-1");
+    const update = calls.find((c) => c.method === "update");
+    expect(update?.args[0]).toEqual({ pending_status_change: null });
+    expect(calls).toContainEqual({ method: "eq", args: ["id", "biz-1"] });
+  });
+
+  it("throws the Supabase error message on failure", async () => {
+    const { db } = fakeDb({ error: { message: "clear boom" } });
+    await expect(clearPendingStatusChange(db, "biz-1")).rejects.toThrow("clear boom");
   });
 });
 
@@ -134,5 +189,70 @@ describe("findBusiness", () => {
   it("throws the Supabase error message on failure", async () => {
     const { db } = fakeDb({ error: { message: "boom" } });
     await expect(findBusiness(db, "biz-1")).rejects.toThrow("boom");
+  });
+});
+
+describe("recentPostedAcrossClients", () => {
+  it("joins the business name and filters to posted", async () => {
+    const rows = [{
+      id: "r1", business_id: "b1", rating: 5, reviewer: "Ann", review_text: "great",
+      reply_text: "thanks", detail_referenced: null, similarity: 0.1, flags: [],
+      status: "posted", created_at: "2026-07-30T00:00:00Z",
+      posted_at: "2026-07-30T01:00:00Z", businesses: { name: "Joe's" },
+    }];
+    const { db, calls } = fakeDb({ data: rows });
+    const out = await recentPostedAcrossClients(db);
+    expect(out[0].businessName).toBe("Joe's");
+    expect(out[0].review.id).toBe("r1");
+    expect(calls).toContainEqual({ method: "eq", args: ["status", "posted"] });
+    expect(calls).toContainEqual({
+      method: "order", args: ["posted_at", { ascending: false, nullsFirst: false }],
+    });
+    expect(calls).toContainEqual({ method: "limit", args: [20] });
+  });
+
+  it("maps a missing joined business to null, not empty string", async () => {
+    const rows = [{
+      id: "r1", business_id: "b1", rating: 5, reviewer: "Ann", review_text: "great",
+      reply_text: "thanks", detail_referenced: null, similarity: 0.1, flags: [],
+      status: "posted", created_at: "2026-07-30T00:00:00Z",
+      posted_at: "2026-07-30T01:00:00Z", businesses: null,
+    }];
+    const { db } = fakeDb({ data: rows });
+    const out = await recentPostedAcrossClients(db);
+    expect(out[0].businessName).toBeNull();
+  });
+});
+
+describe("listReviewMeta", () => {
+  it("returns [] for an empty id list without querying", async () => {
+    const { db, calls } = fakeDb({ data: [] });
+    expect(await listReviewMeta(db, [])).toEqual([]);
+    expect(calls).toHaveLength(0);
+  });
+  it("maps rows and scopes to the given business ids", async () => {
+    const rows = [{ business_id: "b1", status: "draft", created_at: "2026-07-30T00:00:00Z", posted_at: null }];
+    const { db, calls } = fakeDb({ data: rows });
+    expect(await listReviewMeta(db, ["b1", "b2"])).toEqual([
+      { businessId: "b1", status: "draft", createdAt: "2026-07-30T00:00:00Z", postedAt: null },
+    ]);
+    expect(calls).toContainEqual({ method: "in", args: ["business_id", ["b1", "b2"]] });
+  });
+  it("orders by created_at descending, newest first", async () => {
+    // The entire result feeds buildAttention, which needs the latest row per
+    // client (draft signal) and the newest posted_at (staleness signal).
+    // Without an ORDER BY, any future row cap would truncate arbitrarily and
+    // silently corrupt both signals — so this ordering call must never be
+    // removed without a replacement guarantee.
+    const { db, calls } = fakeDb({ data: [] });
+    await listReviewMeta(db, ["b1"]);
+    expect(calls).toContainEqual({
+      method: "order", args: ["created_at", { ascending: false }],
+    });
+  });
+  it("caps the row count so the accumulating audit trail can't grow unbounded", async () => {
+    const { db, calls } = fakeDb({ data: [] });
+    await listReviewMeta(db, ["b1"]);
+    expect(calls).toContainEqual({ method: "limit", args: [1000] });
   });
 });

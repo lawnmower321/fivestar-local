@@ -181,3 +181,110 @@ findBusiness (.maybeSingle) lets route code call notFound(), caught by a
 boundary at app/admin/(protected)/clients/not-found.tsx — placed at the
 PARENT (not the [id]) segment because a segment's own not-found.js nests
 inside its layout and so cannot catch that layout's own guard throw.
+
+## 2026-07-31 — Phase 3: activity timeline (activities table, app-level writers)
+activities (0004) is the one-table timeline: notes are type 'note'; reply
+posts, KB/voice saves (kb_updated, metadata.section distinguishes), and real
+status changes write from the actions themselves (no DB triggers — testable
+writers, per the vision spec). Only notes are deletable, enforced by the db
+helper's type='note' filter, not just the UI. body is null except note text
+and task_completed's task-title snapshot; other labels derive from
+type+metadata (lib/crm/timeline.activityLabel). Writer failures propagate
+loudly. Timestamps render in America/New_York (user decision 2026-07-31,
+spec 2026-07-31-phases-3-5-design.md).
+
+## 2026-07-31 — Phase 4: tasks & today-dashboard
+tasks (0005): business_id nullable (general to-dos), assignee null = "either
+of us". Tasks are hard-deletable (user decision 2026-07-31) — a mis-created
+task must not force a bogus task_completed timeline entry. Completing a
+client-linked task writes task_completed (title snapshot in body); reopening
+leaves that entry (history is fact) and writes nothing. Due-date math runs in
+America/New_York via lib/crm/dates (todayInTimeZone); dashboard = today +
+overdue only; undated tasks live in /admin/tasks' Anytime section. /admin is
+now the today-dashboard, replacing the Phase-2 redirect.
+
+## 2026-07-31 — Phase 4 fix wave: real completeTask transition, revalidation ordering
+Whole-branch review of Phase 4 found three seam-level bugs, all fixed together
+(no second wave planned). (1) completeTask now only writes/returns a row when
+`.eq("status","open")` actually matched (maybeSingle, so already-done returns
+null instead of an unconditional single()) — completing an already-done task
+(reopen→complete cycles, two founders racing the same task, or the checkbox
+bug below) no longer inserts a second permanent task_completed activity.
+(2) setTaskStatusAction now calls revalidateTaskSurfaces immediately after
+completeTask succeeds, BEFORE the task_completed insertActivity call, so a
+failing activity write (which still throws — that propagation is
+intentional) can no longer leave the checkbox showing unchecked against a
+task that is actually done in the database. (3) TaskForm's createTaskAction
+call is now wrapped in try/catch, matching TaskItem's existing pattern —
+requireUser() throws rather than redirecting on an expired session, and that
+rejection was escaping the transition to the nearest error boundary,
+losing the page and the typed title. Also: listRecentActivities now maps a
+missing joined business to null (was ""), matching listAllTasks, so the two
+helpers agree and a renderer can't mistake an empty string for real data;
+and due dates render via the new lib/crm/dates.formatDueDate (string-part
+parsing, not `new Date(str).toLocaleDateString()`, which would reintroduce
+the UTC-shift bug this file exists to prevent).
+
+## 2026-07-31 — Phase 5: ReplyDesk cross-client dashboard
+/admin/replydesk = recent posted replies (20, joined business names) +
+"needs attention" for ACTIVE clients only: latest review row is an unposted
+draft, and/or no posted reply in 7+ days / ever (signals + window
+user-approved 2026-07-31). The draft signal reads only the latest row per
+client because draft rows are an accumulating audit trail (regenerations).
+Heuristic is pure (lib/crm/attention.buildAttention); review readers live in
+lib/replydesk/db (reviews are ReplyDesk domain). Read-only page — no new
+actions.
+
+## 2026-07-31 — Phase 5 fix wave: listReviewMeta ordering, null-join convention, nullsFirst
+Whole-branch review of Phase 5 found six issues, all fixed together (no second
+wave planned). (1) listReviewMeta now orders by created_at desc — it was
+unbounded AND unordered, and it is the entire input to buildAttention on a
+force-dynamic page; any future row cap (PostgREST db-max-rows, or a defensive
+.limit()) would otherwise truncate arbitrarily and silently compute a wrong
+verdict for both A5 signals. (2) recentPostedAcrossClients now maps a missing
+business join to null, not "" — the Phase 4 fix wave deliberately rejected the
+""-for-missing-join convention (see above) so listRecentActivities/listAllTasks
+agree; this reader had reintroduced it. The dashboard page renders the null
+case as plain "Unknown client" text, matching the Phase-4 dashboard's pattern.
+(3) Both recentPostedAcrossClients and recentPostedReplies now order posted_at
+desc with nullsFirst:false — Postgres defaults DESC to nulls-first, and
+0001_replydesk.sql never ties status='posted' to a non-null posted_at, so
+without this a null-postedAt posted row would sort to the top of "Recent
+replies" with no date shown. (4) ReviewMeta moved from lib/crm/attention.ts to
+lib/replydesk/types.ts (beside Review) — it's a projection of the reviews
+table, so lib/replydesk/db.ts should own it rather than importing its own
+table's row shape from lib/crm; attention.ts now imports it type-only and
+re-exports it. (5) The star-rating glyphs on /admin/replydesk now render
+behind aria-hidden with an aria-label text alternative, matching every other
+icon on this branch. (6) lib/crm/CLAUDE.md's timestamp-comparison invariant
+now notes it applies to timestamptz columns only — due_date is a Postgres
+date column (bare YYYY-MM-DD, no offset), so dates.ts/tasks.ts's string
+comparisons there are correct, not a violation.
+
+## 2026-08-01 — Post-merge cleanup: status_change reconciliation, review-meta cap, a11y parity, sidebar rename
+Four items parked at the end of phases 3–5 were closed out. (1) The
+status_change retry-loss bug (Phase 3 whole-branch review): a failed
+insertActivity after a successful status update was permanently unrecoverable
+on retry, since the retry re-reads the already-updated status and sees no
+change. Fixed with a new nullable `businesses.pending_status_change` jsonb
+column (migration 0006) — updateClientDetailsAction now writes it atomically
+with the status column (same UPDATE statement) via
+setStatusWithPending(db, id, from, to), and flushes whatever is outstanding
+(this call's or an earlier failed call's) via
+getPendingStatusChange/clearPendingStatusChange after the primary writes
+succeed. A subsequent activity-write failure still propagates loudly, but the
+marker persists until the write succeeds, so the transition is never lost —
+chosen over a Postgres stored procedure/transaction specifically to keep the
+fix in pure, DI-tested TS rather than introducing DB-side logic. updateBusiness
+no longer accepts a `status` patch field, so every status write goes through
+the pending-tracked path. (2) listReviewMeta now caps at
+REVIEW_META_ROW_CAP=1000 rows (lib/replydesk/db.ts) — the ordering fix alone
+left the table free to grow unbounded as an audit trail; the cap is generous
+enough that it isn't expected to bind against realistic review + draft volume.
+(3) components/admin/reply-workspace.tsx's posted-reviews log had the same
+bare "★".repeat() a11y bug already fixed on /admin/replydesk — same
+role="img" + aria-hidden pattern applied here. (4) The sidebar's cross-client
+dashboard is relabeled "Reply queue" (admin-sidebar.tsx, and the page's own
+h1) — "ReplyDesk" now names only the actual per-client reply workspace
+(client-tabs.tsx), removing the naming collision the Phase 5 review flagged;
+the route itself (/admin/replydesk) is unchanged.
