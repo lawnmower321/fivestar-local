@@ -40,10 +40,22 @@ ID-1 card ratio, `bg-gradient-to-br from-slate-900`). **No such object exists in
 line.** The real hardware is:
 
 - **NFC cards** — the tap targets themselves
-- **A matte-white PVC counter stand** — a flat panel folded at the base into a triangular
-  foot, leaning ~15–20°. Reference: Amazon B0D1R5M7G5 (SZGHR NFC Review Stand — PVC, white,
-  matte, rectangular). The user's own product is the same idea; the stand "looks nicer in
-  some spots."
+- **A matte-white PVC counter stand** — geometry confirmed from a user-supplied photo
+  (2026-08-02): a single sheet with **one bend** — a portrait panel plus a flat base plate
+  folding *forward*. An L in profile, not a triangle (the triangle is the negative space
+  between the leaning panel and the table). Measured off the photo:
+
+  | Property | Value |
+  |---|---|
+  | Panel aspect | ~3 : 4.4 **portrait** |
+  | Corner radius | ~4–5% of panel width, front panel only |
+  | Lean | ~15–18° back from vertical |
+  | Base plate | folds forward, depth ≈ 30% of panel height |
+  | Material thickness | ~1–2% of panel width (a visible sliver on the right edge) |
+  | Shading | fully diffuse — **no specular highlight anywhere on the object** |
+
+  The user's product is the same idea as Amazon B0D1R5M7G5; the stand "looks nicer in some
+  spots" than a bare card.
 
 The copy in `lib/content.ts` is already correct and sells both — "NFC cards + a counter
 stand" (l.79), "2 NFC cards + counter stand" (l.118), "the cards, stand, and in-person
@@ -149,15 +161,24 @@ under a single `perspective`, with `rotateY` driven by Motion's `useScroll`.
 ```
 container        perspective: 1200px
   table plane    rotateX(~70deg), Ink with a soft radial pool of light
-  stand          front panel  rotateX(-17deg)
-                 base foot    folded triangle, meets panel at the crease
-                 contact shadow: blurred ellipse, scales with rotation
-  card           flat, translateZ above the table, slight Y offset
+  stand          panel     portrait 3:4.4, rounded corners, rotateX(-17deg)
+                 edge      separate thin element (~1.5% of width) — NOT a
+                           rounded face; rounding the edge is where cheap
+                           CSS 3D gives itself away
+                 base      flat plate, folds forward at the crease,
+                           depth ~30% of panel height
+                 shadow    blurred ellipse, scales + offsets with rotation
+  card           flat slab, translateZ above the table, offset beside the stand
 ```
 
-Matte white PVC is the most forgiving material there is for this technique — no reflections,
-no foil sheen, no refraction. Diffuse shading is a gradient. **The thing WebGL buys is
-exactly what this material does not need.**
+**The photo confirms the object has no specular highlight at all** — it is fully diffuse
+matte PVC. So a driven gradient is not an approximation of the real material; it *is* the
+real material's behaviour. This is what settles the WebGL question: there is no light
+response to simulate.
+
+Note the panel is **portrait**, not the landscape `aspect-[1.586]` of the card it replaces —
+it occupies hero space differently (taller, narrower, sits better in a side column than
+centred).
 
 **Where this approach would break down** (documented so the decision is on record): a
 physically-tracking specular highlight, environment reflections, refraction, or a contact
