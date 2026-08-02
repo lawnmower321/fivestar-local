@@ -36,6 +36,15 @@ export const content = {
     ctaSecondary: "See how it works",
     tapHint: "Try it — click the card",
   },
+  // The copy actually printed on the physical counter stand in the hero.
+  // The headline is two lines because that is how it reads on the real
+  // product; where the break goes is layout, so the <br> lives in the
+  // component and only the two lines live here.
+  stand: {
+    headlineLine1: "Leave us a",
+    headlineLine2: "Google review",
+    tapLabel: "Tap your phone here",
+  },
   // The simulated review that plays when someone clicks the hero card
   demo: {
     author: "You",

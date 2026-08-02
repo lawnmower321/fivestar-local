@@ -3,6 +3,7 @@
 import { motion, useReducedMotion, useTransform, type MotionValue } from "motion/react";
 import { Nfc, Star } from "lucide-react";
 import { BRAND } from "@/lib/brand";
+import { content } from "@/lib/content";
 
 // The real product: a matte-white PVC counter stand — one sheet, one bend.
 // A portrait panel leaning back, plus a base plate folding forward. An "L"
@@ -36,11 +37,20 @@ export function CounterStand({
 }) {
   const reduce = useReducedMotion();
 
-  // Scroll drives a shallow yaw. ±14° is enough to read as a solid object
-  // turning; more starts to expose how thin the side wall really is.
+  // Scroll drives a shallow yaw: −16° at progress 0 through to +10° at 1.
+  // That is a 26° sweep, and deliberately asymmetric — the object rests
+  // turned toward the viewer's left (so the right side wall is the near edge
+  // and reads as thickness) and swings past face-on. Widening it further
+  // starts to expose how thin that side wall really is.
+  //
+  // Reduced motion pins the yaw at the RESTING pose, −16°, not at some other
+  // angle: it suppresses the motion, not the pose. This matters beyond taste
+  // — `useReducedMotion()` is false on the server and true on the first
+  // client render, so baking a different resting angle into this range emits
+  // a different inline `transform` on each side and fails hydration.
   const fallback = useTransform(() => 0);
   const source = scrollProgress ?? fallback;
-  const rotateY = useTransform(source, [0, 1], reduce ? [-8, -8] : [-16, 10]);
+  const rotateY = useTransform(source, [0, 1], reduce ? [-16, -16] : [-16, 10]);
 
   // Diffuse shading that tracks the yaw: as the panel turns away from the
   // key light the gradient slides across it. No highlight, only falloff.
@@ -75,7 +85,10 @@ export function CounterStand({
             has no visible edge and its rotation with the scene is
             imperceptible. Sits at the crease and extends forward. Tinted with
             ink rather than white because the ground behind the object is a
-            light one — a white pool on white is no pool at all. */}
+            light one — a white pool on white is no pool at all. If the hero
+            ground is ever moved to the Ink surface, this polarity must invert
+            back to white (rgba(255,255,255,0.14 → 0.04 → transparent)) or the
+            pool disappears again, this time into the dark. */}
         <div
           aria-hidden
           className="absolute left-1/2 top-full h-[220%] w-[320%] -translate-x-1/2"
@@ -121,11 +134,16 @@ export function CounterStand({
           }}
         />
 
-        {/* ---- the leaning panel ------------------------------------------- */}
+        {/* ---- the leaning panel -------------------------------------------
+            The 17° lean is a locked geometry value, so it is expressed as a
+            Motion `rotateX` prop rather than a raw `transform` string: Motion
+            composes transform from its own props and silently discards any
+            string alongside them (see the contact shadow above). As a prop it
+            survives whatever transform props this element picks up later. */}
         <motion.div
           className="absolute inset-0"
           style={{
-            transform: `rotateX(${LEAN_DEG}deg)`,
+            rotateX: LEAN_DEG,
             transformOrigin: "bottom center",
             transformStyle: "preserve-3d",
           }}
@@ -157,7 +175,11 @@ export function CounterStand({
           <motion.div
             className="absolute inset-0 flex flex-col items-center justify-between px-[9%] py-[11%]"
             style={{
-              borderRadius: `${RADIUS_PCT}%`,
+              // 4.5% of panel WIDTH. A percentage border-radius resolves
+              // horizontally against width and vertically against height, so
+              // `4.5%` on a 3:4.4 box gives an elliptical corner — the exact
+              // stretched-corner tell that gives cheap CSS 3D away.
+              borderRadius: `calc(var(--stand-w) * ${RADIUS_PCT / 100})`,
               background: panelGradient,
               // Ambient occlusion only — a soft outer falloff so a white
               // panel still has an edge against a white ground, plus the
@@ -177,7 +199,11 @@ export function CounterStand({
                 className="text-center font-heading text-[0.95rem] font-extrabold leading-tight"
                 style={{ color: BRAND.ink }}
               >
-                Leave us a<br />Google review
+                {/* the break is layout, not copy — the two lines live in
+                    lib/content.ts, where the break does not */}
+                {content.stand.headlineLine1}
+                <br />
+                {content.stand.headlineLine2}
               </p>
             </div>
 
@@ -192,7 +218,7 @@ export function CounterStand({
               className="font-mono text-[0.5rem] uppercase tracking-[0.18em]"
               style={{ color: BRAND.slate }}
             >
-              Tap your phone here
+              {content.stand.tapLabel}
             </p>
           </motion.div>
         </motion.div>
