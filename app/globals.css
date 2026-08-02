@@ -131,10 +131,15 @@
 
 @theme {
   /* FiveStar Local owned brand — docs/brand.md ("Cobalt & Honey"). Use these
-     for everything FiveStar owns: site chrome, buttons, links, the ripple. */
-  --color-brand: #2749d6; /* cobalt — primary actions, links, ripple */
-  --color-star: #e8a317;  /* honey — stars, highlights */
-  --color-ink: #0f1b3d;   /* navy-black — headlines, dark accents */
+     for everything FiveStar owns: site chrome, buttons, links, the ripple.
+     Mirrored as values in lib/brand.ts — keep both in sync. */
+  --color-brand: #2749d6;    /* cobalt — primary actions, links, ripple */
+  --color-star: #e8a317;     /* honey — stars, highlights */
+  --color-ink: #0f1b3d;      /* navy-black — dark grounds, headlines */
+  --color-paper: #fcfbf9;    /* light ground, warmed off screen-white */
+  --color-mist: #f7f9fc;     /* secondary light ground */
+  --color-body: #5b6b83;     /* body text (named 'body' — 'slate' is taken by Tailwind) */
+  --color-hairline: #e4e9f1; /* borders, dividers */
 
   /* Google's trademark palette — ONLY for components that depict real
      Google UI (review-showcase, scan-showcase, tap-demo). Never in
