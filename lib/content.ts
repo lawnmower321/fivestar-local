@@ -34,7 +34,14 @@ export const content = {
       "A small card on your counter. Your customer taps it with their phone, your Google review page opens, and the review happens before they're out the door. We come to you and set the whole thing up while you watch.",
     cta: "See pricing",
     ctaSecondary: "See how it works",
-    tapHint: "Try it — click the card",
+    tapHint: "Try it — click the stand",
+    // Pinned to the hero's base — fills the measured ~250px dead zone and
+    // gives the three most-asked questions a one-click path.
+    quickLinks: [
+      { label: "See pricing", href: "#pricing" },
+      { label: "How it works", href: "#how-it-works" },
+      { label: "What you get", href: "#what-you-get" },
+    ],
   },
   // The copy actually printed on the physical counter stand in the hero.
   // The headline is two lines because that is how it reads on the real

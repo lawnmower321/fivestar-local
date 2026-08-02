@@ -9,7 +9,7 @@ import type { Ground } from "@/lib/brand";
 const GROUNDS: Record<Ground, string> = {
   paper: "bg-paper text-body",
   mist: "bg-mist text-body",
-  ink: "bg-ink text-slate-300",
+  ink: "bg-ink text-white/70",
   cobalt: "bg-brand text-white",
 };
 

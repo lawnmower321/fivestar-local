@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion, type MotionValue } from "motion/react";
 import { CheckCircle2, ChevronDown, Star } from "lucide-react";
 import { CounterStand } from "@/components/site/counter-stand";
 import { content } from "@/lib/content";
@@ -12,17 +12,26 @@ const STAR_MS = 260;
 const TYPE_MS = 24;
 
 /**
- * Concentric NFC field lines — radii are set relative to the card's own
- * footprint (320×202px max), not arbitrary: the innermost ring sits mostly
- * behind the card, each step out clears a little more of it, and the
- * outermost ring shares its radius with the pulsing arc below so the
- * "broadcast" reads as riding the edge of the field rather than a
- * coincidence.
+ * Concentric NFC field lines. The radii were set against the old landscape
+ * card (320×202) and were NOT re-derived when Task 3 replaced it with the
+ * counter stand, so describe what they now actually do: the object is a
+ * portrait 260×~469 box (panel plus the marginBottom that reserves flow
+ * space for the base plate and its shadow), which puts this field's centre
+ * roughly 44px BELOW the panel's optical centre. The innermost ring (r=140)
+ * therefore falls inside the silhouette and is hidden by the panel rather
+ * than peeking out behind it; the two outer rings clear the object's waist
+ * and read as the field. The outermost still shares its radius with the
+ * pulsing arc, so the "broadcast" rides the edge of the field by
+ * construction rather than by coincidence.
  */
 function RippleField() {
   return (
+    // Stroke colour is white/20, not a slate token: these are meant to read as
+    // faint field lines, and Task 4 put the hero on the Ink ground, where
+    // slate-300 stops being faint and turns the field into a bullseye louder
+    // than the object it is supposed to be radiating from.
     <svg
-      className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 text-slate-300"
+      className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 text-white/20"
       viewBox="0 0 500 500"
       fill="none"
       aria-hidden
@@ -46,7 +55,7 @@ function RippleField() {
   );
 }
 
-export function TapDemo() {
+export function TapDemo({ scrollProgress }: { scrollProgress?: MotionValue<number> }) {
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [stage, setStage] = useState<Stage>("stars");
@@ -111,14 +120,14 @@ export function TapDemo() {
           aria-controls="tap-demo-panel"
           className="group relative z-10 block cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4"
         >
-          <CounterStand />
+          <CounterStand scrollProgress={scrollProgress} />
         </button>
       </div>
 
       <button
         type="button"
         onClick={toggle}
-        className="mt-5 inline-flex cursor-pointer items-center gap-1.5 font-mono text-xs uppercase tracking-[0.2em] text-slate-500 transition-colors hover:text-gblue"
+        className="mt-5 inline-flex cursor-pointer items-center gap-1.5 font-mono text-xs uppercase tracking-[0.2em] text-white/50 transition-colors hover:text-star"
       >
         {content.hero.tapHint}
         <ChevronDown

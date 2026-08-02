@@ -81,21 +81,25 @@ export function CounterStand({
         }}
       >
         {/* ---- table plane -------------------------------------------------
-            A pool of shade, not a slab: it fades to fully transparent, so it
+            A pool of LIGHT, not a slab: it fades to fully transparent, so it
             has no visible edge and its rotation with the scene is
-            imperceptible. Sits at the crease and extends forward. Tinted with
-            ink rather than white because the ground behind the object is a
-            light one — a white pool on white is no pool at all. If the hero
-            ground is ever moved to the Ink surface, this polarity must invert
-            back to white (rgba(255,255,255,0.14 → 0.04 → transparent)) or the
-            pool disappears again, this time into the dark. */}
+            imperceptible. Sits at the crease and extends forward.
+            Polarity follows the ground behind the object, and Task 4 moved
+            the hero onto the Ink surface, so this is white — the ink tint it
+            carried while the hero was light vanished completely into the dark
+            and the object lost the surface it was standing on. If the hero is
+            ever returned to a light ground, invert this back to
+            rgba(15,27,61,0.07 → 0.03 → transparent) or the pool disappears
+            again, that time into the white. The contact shadow below stays
+            ink either way: it is the object's shadow ON the pool, so it wants
+            to be darker than whatever the pool is. */}
         <div
           aria-hidden
           className="absolute left-1/2 top-full h-[220%] w-[320%] -translate-x-1/2"
           style={{
             transform: "rotateX(90deg)",
             transformOrigin: "top center",
-            background: `radial-gradient(ellipse 55% 42% at 50% 30%, rgba(15,27,61,0.07), rgba(15,27,61,0.03) 45%, transparent 72%)`,
+            background: `radial-gradient(ellipse 55% 42% at 50% 30%, rgba(255,255,255,0.14), rgba(255,255,255,0.04) 45%, transparent 72%)`,
           }}
         />
 
