@@ -173,3 +173,8 @@
 @media (prefers-reduced-motion: reduce) {
   .nfc-ripple, .ring-pulse { animation: none; }
 }
+
+/* Counter-stand panel width — the one number the whole CSS-3D scene scales
+   from (every other dimension in counter-stand.tsx is a % of it). */
+:root { --stand-w: 190px; }
+@media (min-width: 768px) { :root { --stand-w: 260px; } }

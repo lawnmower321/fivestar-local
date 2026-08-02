@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { CheckCircle2, ChevronDown, Star } from "lucide-react";
-import { NfcCard } from "@/components/site/nfc-card";
+import { CounterStand } from "@/components/site/counter-stand";
 import { content } from "@/lib/content";
 
 type Stage = "stars" | "typing" | "posted";
@@ -109,9 +109,9 @@ export function TapDemo() {
           onClick={toggle}
           aria-expanded={open}
           aria-controls="tap-demo-panel"
-          className="group relative z-10 block cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-gblue focus-visible:ring-offset-4"
+          className="group relative z-10 block cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4"
         >
-          <NfcCard />
+          <CounterStand />
         </button>
       </div>
 
