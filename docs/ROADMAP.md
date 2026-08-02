@@ -1,5 +1,12 @@
 # FiveStar Local — Roadmap (approved 2026-07-27)
 
+> **STATUS 2026-08-01 — all three tracks are complete.** Track A (CRM
+> Phases 3–5), Track B (brand; B2 skipped by decision), and Track 0
+> (production readiness) are all done and deployed. The only remaining
+> work is the parked launch backlog at the bottom of this file, every item
+> of which is blocked on something external rather than on code. Per-item
+> evidence is inline below. This document is now a record, not a queue.
+
 **Scope:** everything remaining across the product: CRM build-out (Track A),
 brand & design (Track B), production readiness (Track 0), and the parked
 launch backlog. Written to be executable by someone with no memory of the
@@ -19,25 +26,36 @@ boundary.
 
 ---
 
-## Current state (all verified 2026-07-27)
+## Current state (verified 2026-08-01)
 
-- `master` = `c55855d`, in sync with `origin/master` (git).
-- Vercel production is READY at `c55855d` — deployments are caught up
-  (Vercel API). Project `project-wkd8v`, team `team_U6oSzJ8quCdf2rm5o83rAvun`.
-- The 2026-07-26 deploy initially failed because `SUPABASE_URL` /
-  `SUPABASE_PUBLISHABLE_KEY` are **not set on Vercel**; commit `c55855d`
-  works around it with `force-dynamic` on `/admin` — the deployed `/admin`
-  will still fail at request time until env vars are added (Vercel API,
-  commit message).
-- Supabase project is live: `businesses`, `reviews`, `profiles` exist with
-  RLS enabled; remote migration history tracks `profiles` (0002) and
-  `client_fields` (0003); 0001 was pasted manually, as the spec records
-  (Supabase MCP).
-- `profiles` has **0 rows** — the two founder accounts and their profile
-  rows were never seeded (Supabase MCP). Phase 3 attribution depends on this.
-- Working tree: small uncommitted tweaks to `components/site/review-showcase.tsx`,
-  `scan-showcase.tsx`, `tap-demo.tsx`; untracked `.claude/`, `.mcp.json`,
-  `scripts/`, `skills-lock.json` (git status).
+- `master` = `529bfee`, in sync with `origin/master`, working tree clean (git).
+- Supabase: `businesses`, `reviews`, `profiles`, `activities` (0004),
+  `tasks` (0005), and the reconciliation column (0006) are all live with
+  RLS enabled (Supabase MCP).
+- `profiles` has **2 rows** — both founder accounts are seeded, so Phase 3
+  activity attribution has real authors (Supabase MCP, `select count(*)`).
+- Production `/admin` is working. Requesting it returns the login page
+  (`x-matched-path: /admin/login`) rather than a 500, which proves the
+  `(protected)` layout guard ran `requireUser()` → `getAuthClient()` — a
+  factory that throws when its env vars are unset. `SUPABASE_URL` and
+  `SUPABASE_PUBLISHABLE_KEY` are therefore set in production, superseding
+  the 2026-07-27 note below. Zero runtime errors on the route in 7 days.
+- **Not verified:** `SUPABASE_SERVICE_ROLE_KEY` and `OPENROUTER_API_KEY`
+  are only exercised behind a logged-in session, so they can't be checked
+  from outside. A single successful founder login exercising one client's
+  ReplyDesk tab would close this.
+
+<details><summary>Superseded 2026-07-27 state (kept for provenance)</summary>
+
+- `master` = `c55855d`. The 2026-07-26 deploy initially failed because
+  `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` were believed unset on
+  Vercel; `c55855d` worked around it with `force-dynamic` on `/admin`.
+  Resolved — see the live check above.
+- `profiles` had 0 rows; founder accounts unseeded. Resolved (0.2).
+- Working tree had uncommitted `components/site/*` tweaks and untracked
+  `.claude/`, `.mcp.json`, `scripts/`, `skills-lock.json`. Resolved (0.3).
+
+</details>
 
 ## Assumptions ledger
 
@@ -65,11 +83,15 @@ boundary.
 
 ---
 
-## Track 0 — Production readiness & hygiene tail (do first, ~1 session)
+## Track 0 — Production readiness & hygiene tail ✅ DONE (2026-08-01)
 
 *Execution: any model; mostly dashboard work.*
 
-**0.1 Vercel env vars.** Add to the Vercel project (production +
+**0.1 Vercel env vars.** ✅ Done — the two auth vars are confirmed set in
+production by the live `/admin` check in Current state. `scripts/sync-env-to-vercel.ps1`
+is the repeatable path for pushing them from `.env.local`. Residual: the
+service-role and OpenRouter keys remain unverified from outside (see
+Current state). Add to the Vercel project (production +
 preview): `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`,
 `SUPABASE_SERVICE_ROLE_KEY`, `OPENROUTER_API_KEY` — values from
 `.env.local` / provider dashboards, referenced only as `${ENV_VAR}` (never
@@ -77,20 +99,28 @@ pasted into chat or commits).
 **Done when:** the deployed `/admin/login` renders and a login attempt
 reaches Supabase (wrong-password error is success; a 500 is not).
 
-**0.2 Seed founder accounts.** In Supabase dashboard: confirm self-signup
+**0.2 Seed founder accounts.** ✅ Done — `profiles` has 2 rows (Supabase MCP).
+In Supabase dashboard: confirm self-signup
 disabled; create the two founder auth users; insert their `profiles` rows
 (`id` = auth user id, `display_name`). No signup trigger — manual is the
 approved pattern.
 **Done when:** `profiles` has 2 rows and both founders can log in on the
 deployed `/admin`.
 
-**0.3 Hygiene tail.** Commit the three `components/site/*` tweaks as one
+**0.3 Hygiene tail.** ✅ Done — working tree clean; `.claude/`, `.mcp.json`,
+`skills-lock.json` are gitignored and `scripts/` is tracked as project code
+(`cc10a70`). Commit the three `components/site/*` tweaks as one
 marketing commit; add `.claude/`, `.mcp.json`, `skills-lock.json` to
 `.gitignore` (per assumption 1; check `scripts/` contents — commit if it's
 project code, ignore if scratch).
 **Done when:** `git status` is clean.
 
-## Track A — CRM evolution (Phases 3 → 4 → 5, in order)
+## Track A — CRM evolution ✅ DONE (2026-07-31, merged 2026-08-01)
+
+*All three phases built, reviewed, merged to `master`, and deployed.
+Migrations 0004 (activities) and 0005 (tasks) applied; A5's whole-branch
+review additionally caught a PostgREST timestamptz-vs-date serialization
+hazard, now pinned by a regression test.*
 
 *Execution: switch to Opus 4.8 / Sonnet 5. Each phase gets its own detailed
 spec → plan → implementation cycle per the vision spec; the summaries below
@@ -130,7 +160,13 @@ flagged replies pending).
 **Done when:** the page renders live cross-client data and links into each
 client's ReplyDesk tab.
 
-## Track B — Brand & design (parallel to Track A, no code dependency)
+## Track B — Brand & design ✅ DONE (2026-08-01, B2 skipped by decision)
+
+*B1 and B3 shipped. **B2 was deliberately skipped** — pre-made NFC cards
+are being purchased instead of custom-printed ones, so the card print
+design was unnecessary. The owned palette is "Cobalt & Honey"
+(`#2749d6` / `#e8a317`); canonical record is `docs/brand.md` +
+`docs/brand/fivestar-local-brand-kit.html`.*
 
 *Decision (user-delegated, resolved by analysis 2026-07-27): evolve the
 existing brand; do not start from scratch.* Keep: Bricolage Grotesque +
@@ -174,7 +210,7 @@ components; build clean; site visually consistent with the printed card.
 - GBP API application (docs/replydesk/GBP-API.md) → future auto-posting.
 - First case-study numbers → `proof` block after first real install.
 
-## Sequencing
+## Sequencing (historical — all planned work is complete)
 
 ```
 Week 1:   Track 0 (one sitting) ──┬── A3 spec+build
@@ -183,5 +219,25 @@ Week 2+:  A4 ── then A5           └── B3 site alignment (after B1 appr
 Anytime:  parked backlog items as their external blockers clear
 ```
 
-Track B never shares a commit with Track A (marketing/admin separation is a
-binding constraint). A5 may start any time after A3 but reads best after A4.
+Executed as planned except B2 (skipped — pre-made cards). Track B never
+shared a commit with Track A (marketing/admin separation is a binding
+constraint).
+
+## What's actually next
+
+With all three tracks closed, the critical path is **no longer code** — it
+is getting a first real business onto a card. In rough dependency order:
+
+1. **Order the pre-made NFC cards** (the standing launch blocker; B2 was
+   skipped precisely to unblock this).
+2. **Real Google review URL** → `site.reviewUrl`. Cheap, and it makes the
+   hero demo link to something real instead of a placeholder.
+3. **Stripe payment links** → `pricing.tiers[].href`, replacing the mailto
+   fallback. Required before anyone can actually pay.
+4. **Pizza-shop eval** — run ReplyDesk end-to-end against a real business's
+   reviews before a paying customer ever sees it. This also closes the
+   unverified `SUPABASE_SERVICE_ROLE_KEY` / `OPENROUTER_API_KEY` question
+   from Current state, since it exercises both.
+5. Then, as they clear: email forwarding for hello@fivestarlocal.pro,
+   headshots for the team section, the GBP API application, and the first
+   case-study numbers.
