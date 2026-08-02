@@ -1,17 +1,18 @@
 import { Check, Nfc, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/site/reveal";
+import { Section } from "@/components/site/section";
 import { content } from "@/lib/content";
 
 export function Pricing() {
   return (
-    <section id="pricing" className="scroll-mt-16 bg-slate-50 py-24">
+    <Section id="pricing" ground="mist" size="md">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <Reveal className="text-center">
-          <h2 className="font-heading text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          <h2 className="font-heading text-[2rem] font-extrabold tracking-[-0.025em] text-ink sm:text-[2.75rem]">
             {content.pricing.title}
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600">{content.pricing.body}</p>
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-body">{content.pricing.body}</p>
         </Reveal>
 
         <div className="mx-auto mt-16 grid max-w-4xl gap-8 lg:grid-cols-2">
@@ -30,12 +31,12 @@ export function Pricing() {
                   // each tier is styled like the card itself — the thing you're buying
                   dark
                     ? "relative flex flex-col rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8 shadow-2xl shadow-slate-900/30"
-                    : "relative flex flex-col rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"
+                    : "relative flex flex-col rounded-3xl border border-hairline bg-white p-8 shadow-sm"
                 }
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className={`font-heading text-lg font-bold ${dark ? "text-white" : "text-slate-900"}`}>
+                    <p className={`font-heading text-lg font-bold ${dark ? "text-white" : "text-ink"}`}>
                       {tier.name}
                     </p>
                     <div className="mt-1 flex gap-0.5">
@@ -48,14 +49,14 @@ export function Pricing() {
                 </div>
 
                 <div className="mt-7 flex items-baseline gap-2">
-                  <span className={`font-heading text-5xl font-bold tracking-tight ${dark ? "text-white" : "text-slate-900"}`}>
+                  <span className={`font-heading text-5xl font-bold tracking-tight ${dark ? "text-white" : "text-ink"}`}>
                     {tier.price}
                   </span>
-                  <span className={`font-mono text-sm ${dark ? "text-slate-400" : "text-slate-500"}`}>
+                  <span className={`font-mono text-sm ${dark ? "text-slate-400" : "text-body/70"}`}>
                     {tier.cadence}
                   </span>
                 </div>
-                <p className={`mt-3 text-sm ${dark ? "text-slate-300" : "text-slate-600"}`}>{tier.blurb}</p>
+                <p className={`mt-3 text-sm ${dark ? "text-slate-300" : "text-body"}`}>{tier.blurb}</p>
 
                 <ul className="mt-7 flex-1 space-y-3">
                   {tier.features.map((f) => (
@@ -63,7 +64,7 @@ export function Pricing() {
                       <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${dark ? "bg-star/20" : "bg-brand/10"}`}>
                         <Check size={13} className={dark ? "text-star" : "text-brand"} strokeWidth={3} />
                       </span>
-                      <span className={`text-sm ${dark ? "text-slate-300" : "text-slate-700"}`}>{f}</span>
+                      <span className={`text-sm ${dark ? "text-slate-300" : "text-body"}`}>{f}</span>
                     </li>
                   ))}
                 </ul>
@@ -75,7 +76,7 @@ export function Pricing() {
                   className={
                     dark
                       ? "mt-8 w-full bg-brand text-white hover:bg-brand/90"
-                      : "mt-8 w-full border border-slate-300 bg-white text-slate-900 hover:bg-slate-50"
+                      : "mt-8 w-full border border-slate-300 bg-white text-ink hover:bg-mist"
                   }
                 >
                   {tier.cta}
@@ -85,10 +86,10 @@ export function Pricing() {
           })}
         </div>
 
-        <p className="mt-8 text-center font-mono text-xs uppercase tracking-[0.2em] text-slate-500">
+        <p className="mt-8 text-center font-mono text-xs uppercase tracking-[0.2em] text-body/70">
           {content.pricing.finePrint}
         </p>
       </div>
-    </section>
+    </Section>
   );
 }

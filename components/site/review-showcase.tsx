@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Check, CheckCircle2, MapPin, Search, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/site/reveal";
+import { Section } from "@/components/site/section";
 import { content } from "@/lib/content";
 
 type SearchResult = (typeof content.reviewShowcase.search.results)[number];
@@ -143,7 +144,7 @@ export function ReviewShowcase() {
   const results = content.reviewShowcase.search.results;
 
   return (
-    <section className="overflow-hidden bg-white py-24">
+    <Section ground="ink" size="lg" className="overflow-hidden">
       <div className="mx-auto grid max-w-6xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-[5fr_6fr]">
         <Reveal>
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-slate-500">
@@ -180,6 +181,6 @@ export function ReviewShowcase() {
           </div>
         </Reveal>
       </div>
-    </section>
+    </Section>
   );
 }

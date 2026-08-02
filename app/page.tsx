@@ -12,7 +12,7 @@ import { FinalCta } from "@/components/site/final-cta";
 
 export default function Home() {
   return (
-    <div className="bg-white text-slate-800">
+    <div className="bg-paper text-body">
       <Navbar />
       <main>
         <Hero />

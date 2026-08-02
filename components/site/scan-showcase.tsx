@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { CheckCircle2, MapPin, Nfc, PenLine, Star } from "lucide-react";
 import { Reveal } from "@/components/site/reveal";
+import { Section } from "@/components/site/section";
 import { content } from "@/lib/content";
 
 const STEP_MS = 3400;
@@ -90,7 +91,7 @@ export function ScanShowcase() {
   ];
 
   return (
-    <section className="overflow-hidden bg-white py-24">
+    <Section ground="mist" size="lg" className="overflow-hidden">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <Reveal className="text-center">
           <h2 className="font-heading text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
@@ -204,6 +205,6 @@ export function ScanShowcase() {
           </div>
         </div>
       </Reveal>
-    </section>
+    </Section>
   );
 }

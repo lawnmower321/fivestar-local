@@ -1,13 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/site/reveal";
+import { Section } from "@/components/site/section";
 import { content } from "@/lib/content";
 
 export function FinalCta() {
   return (
-    <section className="relative overflow-hidden bg-slate-900 py-24">
+    <Section ground="cobalt" size="md" className="overflow-hidden">
       {/* faint ripple rings — same motif as the hero, radiating from the CTA */}
       <svg
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 text-white/5"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 text-white/10"
         viewBox="0 0 900 900"
         fill="none"
         aria-hidden
@@ -17,20 +18,22 @@ export function FinalCta() {
         ))}
       </svg>
       <Reveal className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
-        <h2 className="font-heading text-3xl font-bold tracking-tight text-white sm:text-4xl">
+        <h2 className="font-heading text-[2rem] font-extrabold tracking-[-0.025em] text-white sm:text-[2.75rem]">
           {content.finalCta.title}
         </h2>
-        <p className="mt-4 text-lg text-slate-300">{content.finalCta.body}</p>
+        <p className="mt-4 text-[1.0625rem] leading-[1.7] text-white/80">{content.finalCta.body}</p>
+        {/* CTA is Honey here: on a Cobalt ground a Cobalt button would vanish.
+            This is the "one CTA" the brand kit allots to Honey. */}
         <Button
           render={<a href={`mailto:${content.site.email}?subject=${encodeURIComponent("Set up my business")}`} />}
           nativeButton={false}
           size="lg"
-          className="mt-8 bg-brand text-white hover:bg-brand/90"
+          className="mt-8 bg-star font-semibold text-ink hover:bg-star/90"
         >
           {content.finalCta.cta}
         </Button>
-        <p className="mt-4 font-mono text-xs tracking-wide text-slate-500">{content.site.email}</p>
+        <p className="mt-4 font-mono text-xs tracking-wide text-white/60">{content.site.email}</p>
       </Reveal>
-    </section>
+    </Section>
   );
 }
