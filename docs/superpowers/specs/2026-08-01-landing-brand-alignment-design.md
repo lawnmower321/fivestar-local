@@ -33,6 +33,23 @@ another company's design language reads as templated by construction.
 **Conclusion:** the defect is *rhythm and colour deployment*, not craft. That is a cheaper fix
 than a redesign, which is why the staged scope below is appropriate.
 
+### Product correction (confirmed with the user 2026-08-02)
+
+`components/site/nfc-card.tsx` renders a **dark credit-card rectangle** (`aspect-[1.586]`,
+ID-1 card ratio, `bg-gradient-to-br from-slate-900`). **No such object exists in the product
+line.** The real hardware is:
+
+- **NFC cards** — the tap targets themselves
+- **A matte-white PVC counter stand** — a flat panel folded at the base into a triangular
+  foot, leaning ~15–20°. Reference: Amazon B0D1R5M7G5 (SZGHR NFC Review Stand — PVC, white,
+  matte, rectangular). The user's own product is the same idea; the stand "looks nicer in
+  some spots."
+
+The copy in `lib/content.ts` is already correct and sells both — "NFC cards + a counter
+stand" (l.79), "2 NFC cards + counter stand" (l.118), "the cards, stand, and in-person
+setup" (l.163). **Only the hero visual is wrong.** No copy changes are needed, and the
+no-copy-rewrite non-goal below still holds.
+
 ## Goals
 
 - Page reads as a confident small studio's work — enough that visitors ask who built it
@@ -48,6 +65,9 @@ than a redesign, which is why the staged scope below is appropriate.
 - No horizontal-scroll section — there is no gallery to justify one
 - No hero→sidebar FLIP morph — ~600 lines for a persistent nav across 9 short sections
 - No photography sourcing — the synthetic/CSS aesthetic is coherent and free
+- **No WebGL / `three`** — the hero object is matte white PVC; CSS 3D covers it (see The Hero
+  Object for the threshold where this would stop being true)
+- No phone-tap choreography in Phase 1 — deferred to the Phase 2 candidate list
 - No copy rewrite; `lib/content.ts` stays the single source of copy
 
 ## Direction — "Commit hard to Cobalt & Honey"
@@ -77,19 +97,28 @@ reads as system feedback rather than brand.
 Replace 2-value alternation with a deliberate 4-beat ladder so the page has cadence:
 
 ```
-Hero            PAPER   (light, open, confident)
-How it works    MIST
-Tap sequence    INK     ← moment, dark ground, card glows
+Hero            INK     ← white stand reads only against dark; Cobalt rings glow
+How it works    PAPER
+Tap sequence    MIST    ← moment
 What you get    PAPER
-Ranking climb   MIST    ← moment
-Pricing         INK     (decision moment, dark = weight)
+Ranking climb   INK     ← moment
+Pricing         MIST
 Team note       PAPER
 FAQ             MIST
 Final CTA       COBALT  (was slate-900 — now brand, not generic dark)
 ```
 
-Two dark grounds mid-page break the monotony and let Cobalt and Honey actually glow. This
-single change does more visible work than any animation in this document.
+**Why the hero is Ink and not Paper:** the hero object is a *matte white* stand. On the
+warm Paper ground it would nearly vanish; it needs a dark ground to read at all. Precedent
+from the reference survey: TeraWulf opens on dark navy and switches to light content
+sections below — the closest analog to this business in the whole survey.
+
+Two dark grounds break the monotony and let Cobalt and Honey actually glow. This single
+change does more visible work than any animation in this document.
+
+**This is the decision most worth reviewing at the Phase 1 gate** — opening dark is a
+bigger commitment than a mid-page dark band, and it is the one choice that could read as
+too heavy for an SMB buyer.
 
 ### Typography
 
@@ -106,6 +135,66 @@ Break the uniform `max-w-6xl` / `py-24` container:
 - Vary vertical rhythm: `py-20` / `py-28` / `py-32` by section weight
 - Allow two sections to bleed full-width against their ground
 - Hero: fill the dead zone — card larger, offset, closer to the headline
+
+## The Hero Object — scroll-rotating counter stand
+
+Replaces the fictional dark credit card. Ink ground, matte-white stand as the focal object,
+with an NFC card lying on the table beside it — this is literally the Starter bundle ("2 NFC
+cards + counter stand"), so the composition is accurate to what the buyer receives.
+
+**Built in CSS 3D, not WebGL.** The stand is two flat planes joined at a fold; the card is a
+flat slab; the table is one plane. All live in a shared `transform-style: preserve-3d` space
+under a single `perspective`, with `rotateY` driven by Motion's `useScroll`.
+
+```
+container        perspective: 1200px
+  table plane    rotateX(~70deg), Ink with a soft radial pool of light
+  stand          front panel  rotateX(-17deg)
+                 base foot    folded triangle, meets panel at the crease
+                 contact shadow: blurred ellipse, scales with rotation
+  card           flat, translateZ above the table, slight Y offset
+```
+
+Matte white PVC is the most forgiving material there is for this technique — no reflections,
+no foil sheen, no refraction. Diffuse shading is a gradient. **The thing WebGL buys is
+exactly what this material does not need.**
+
+**Where this approach would break down** (documented so the decision is on record): a
+physically-tracking specular highlight, environment reflections, refraction, or a contact
+shadow that deforms correctly through a full rotation. If the hero later wants a
+product-render look, that is a `three` rebuild and a different budget. Matte white does not
+warrant it.
+
+**Scope honesty:** an object rotating on scroll is ~60 lines. The staged scene described
+here — table, stand, card, shadow — is closer to 250 lines, and most of the time goes into
+tuning perspective and shadow until it stops looking like flat cardboard. Phone-tap
+choreography (phones flying in on an arc, contact, NFC ripple, retreat) is deliberately
+**deferred to Phase 2**: if the object itself does not look convincing, adding phones will
+not rescue it, and a well-executed rotating object alone still carries the hero.
+
+## Techniques adopted from the reference survey
+
+Surveyed 2026-08-02: terawulf.com, klimtwine.com, ricardochance.com, prixa.digital.
+Adopted (cheap, high-yield, no new dependencies):
+
+| Technique | Source | Applies to |
+|---|---|---|
+| **Rounded content slabs** — inset containers with generous radius, object bleeding off the edge | TeraWulf | `<Section variant="slab">`; creates rhythm through *shape*, so fewer colours are needed |
+| **Scroll-rotating product object** | Klimt (WebGL bottle) | The hero stand, in CSS 3D |
+| **Warm ground instead of pure white** | Klimt (`#cfc6bd` taupe) | Paper token warmed off screen-white — one token, outsized payoff |
+| **Corner bracket frame** — L-brackets inset at page corners | Ricardo Chance | ~10 lines of CSS; reads as deliberate framing, best against Ink |
+| **Hero quick-link strip** — 3-up row pinned to the hero base | TeraWulf | Fixes the measured ~250px hero dead zone: `See pricing →` / `How it works →` / `Book a call →` |
+| **Tighter display tracking** (−0.04em, not −0.03em) | TeraWulf (−2.47px @ 61.7px) | Hero `h1` |
+| **Serif-italic emphasis clause** | Ricardo Chance | `content.hero.highlight` — a font-style change on an existing span, no new markup |
+
+**Rejected:** oversized Anton display type (too shouty for an SMB buyer), WebGL, full-bleed
+video backgrounds (TeraWulf pays 42.3s to networkidle for these — this site loads in 1.52s
+and that lead is worth protecting), sticky-stacking cards, `mix-blend-mode` type/media
+overlap (needs real photography).
+
+**Structural validation:** TeraWulf runs 39 ScrollTriggers, **all 39 scrubbed and zero
+pinned**. This confirms the approach below — both moments are scrub-driven and unpinned, and
+the one place sticky behaviour is needed uses CSS `position: sticky` rather than JS pinning.
 
 ## The Two Moments
 
@@ -159,7 +248,9 @@ Timer fallback retained for reduced-motion and below 768px.
 | `app/globals.css` | Add Cobalt & Honey tokens; retire Google palette | M |
 | `lib/brand.ts` *(new)* | Exported colour + easing constants, single source | S |
 | `components/site/section.tsx` *(new)* | `<Section ground="paper\|mist\|ink\|cobalt">` wrapper owning rhythm + padding | S |
-| `components/site/hero.tsx` | Structural rebuild — scale, asymmetry, dead-zone fix | L |
+| `components/site/hero.tsx` | Structural rebuild — Ink ground, scale, asymmetry, quick-link strip | L |
+| `components/site/nfc-card.tsx` | **Replaced** by `counter-stand.tsx` — the dark credit card is not a real product | — |
+| `components/site/counter-stand.tsx` *(new)* | CSS-3D matte-white stand + card on a table plane, scroll-rotated | L |
 | `components/site/scan-showcase.tsx` | **Moment 2** — scroll-driven tap sequence | L |
 | `components/site/review-showcase.tsx` | **Moment 1** — ranking climb | L |
 | `components/site/odometer.tsx` *(new)* | Reusable digit-roll for counts and ratings | M |
@@ -194,19 +285,27 @@ owns digit rolling; neither knows about the other. Both are independently testab
 
 ### Phase 1 — approved scope, stop and evaluate
 
-1. **Foundation** — `lib/brand.ts`, tokens in `globals.css`, `<Section>` component
+1. **Foundation** — `lib/brand.ts`, tokens in `globals.css`, `<Section>` (with `slab` variant)
 2. **Global pass** — all 9 sections adopt `<Section>`, new type scale, retire Google palette
-3. **Hero** — structural rebuild
-4. **Moment 1** — ranking climb + `Odometer`
-5. **Moment 2** — tap sequence
-6. **Verify** — build, lint, tests, both viewports, both motion settings
+3. **Hero object** — `counter-stand.tsx`, the CSS-3D stand + card on a table plane
+4. **Hero** — structural rebuild around it: Ink ground, quick-link strip, corner brackets
+5. **Moment 1** — ranking climb + `Odometer`
+6. **Moment 2** — tap sequence
+7. **Verify** — build, lint, tests, both viewports, both motion settings
 
 **→ GATE: deploy to a Vercel preview, look at it, decide whether Phase 2 is needed.**
 
+Review at the gate, in priority order: (a) does opening on Ink read as premium or as heavy?
+(b) does the stand read as a real object or as flat cardboard? (c) is the page still fast?
+
 ### Phase 2 — only if Phase 1 is not enough
 
-Structural rework of the remaining six sections (how-it-works, benefits, pricing, team-note,
-FAQ, final-CTA) rather than restyle. Scoped separately after the gate; not committed to now.
+Candidates, scoped separately after the gate; not committed to now:
+
+- **Phone-tap choreography** on the hero stand — phones arc in, tap, NFC ripple fires,
+  retreat. Deferred deliberately (see The Hero Object above).
+- Structural rework of the remaining six sections (how-it-works, benefits, pricing,
+  team-note, FAQ, final-CTA) rather than restyle.
 
 ## Success Criteria
 
