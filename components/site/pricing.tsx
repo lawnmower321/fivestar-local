@@ -52,7 +52,7 @@ export function Pricing() {
                   <span className={`font-heading text-5xl font-bold tracking-tight ${dark ? "text-white" : "text-ink"}`}>
                     {tier.price}
                   </span>
-                  <span className={`font-mono text-sm ${dark ? "text-slate-400" : "text-body/70"}`}>
+                  <span className={`font-mono text-sm ${dark ? "text-white/70" : "text-body/70"}`}>
                     {tier.cadence}
                   </span>
                 </div>
