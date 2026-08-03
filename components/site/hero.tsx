@@ -137,10 +137,29 @@ export function Hero() {
               for the card's corner to clear the screen edge there. It still
               crosses the container's own content edge by ~12px, so the bleed
               survives — token, as it must be when there is no gutter to bleed
-              into. */}
+              into.
+
+              1380 is where the object stops needing help and goes back to
+              full size, so it gets a third constant. The un-scaled object
+              wants a margin of (682.7 − viewport/2)px; that stops being
+              POSITIVE — i.e. the gutter finally covers the overhang on its
+              own — at viewport 1365, which is 1380 once the scrollbar is
+              counted. Above it, 690px − 50vw lands the corner 12px inside the
+              screen at full size; below it, no margin the 0px ceiling permits
+              can do the job and the scale on the box takes over. The two
+              bands are continuous where they meet: at 1379 the corner sits
+              12.3px inside, at 1380 11.8px.
+
+              These three are `min-[…]` and not `lg:`/`xl:` on purpose.
+              Tailwind 4 emits every arbitrary min-width variant AHEAD of the
+              named breakpoints, so an `xl:` rule beats a `min-[1380px]:` one
+              at 1920 — the ladder silently collapses to its middle rung.
+              Keeping the whole ladder in one variant family keeps it sorted
+              by width, which is the only thing making the cascade correct
+              here. */}
           <motion.div
             {...fade(0.15)}
-            className="relative flex justify-center lg:mr-[clamp(0px,634px_-_50vw,52px)] lg:justify-end lg:pt-6 xl:mr-[clamp(-9rem,634px_-_50vw,0px)]"
+            className="relative flex justify-center lg:justify-end lg:pt-6 min-[1024px]:mr-[clamp(0px,634px_-_50vw,52px)] min-[1280px]:mr-[clamp(-9rem,634px_-_50vw,0px)] min-[1380px]:mr-[clamp(-9rem,690px_-_50vw,0px)]"
           >
             {/* Fixed to the review panel's own width from lg up, so opening
                 the panel cannot re-centre the stand underneath it. Full width
@@ -149,7 +168,7 @@ export function Hero() {
                 352px box is wider than the column, which pushed that card's
                 far corner a few pixels off the screen.
 
-                The two scales are the only lever that shortens the overhang
+                The scales are the only lever that shortens the overhang
                 itself, and a uniform scale is the one lever that cannot
                 disturb the counter stand's locked geometry: --stand-w and
                 every proportion derived from it are untouched, the whole
@@ -157,25 +176,41 @@ export function Hero() {
                 could not do this job — at 1024 the object would have had to
                 come in ~107px, which walks the panel underneath the headline.
 
-                lg 0.88, origin left: the left edge is where the object meets
-                the copy, so anchoring there keeps the panel off the headline
-                (35px of clearance at 1024) while pulling the far corner in by
-                56px — the amount the 1024–1380 band is short.
+                1024–1379 0.88, origin left: the left edge is where the object
+                meets the copy, so anchoring there keeps the panel off the
+                headline (35px of clearance at 1024) while pulling the far
+                corner in by 56px — the amount that band is short. From 1380
+                the gutter is wide enough on its own and the object goes back
+                to full size; it is never scaled at a width that does not need
+                it.
 
                 base 0.8, origin centre (the default): below 480px the scene
-                is ~211px wide to the right of its own centre and the viewport
-                gives it only half its width, so the card ran off the edge as
-                the yaw scrubbed. Scaling about the centre is what keeps the
-                demo — stand, hint and review panel alike — centred; shifting
-                it left instead would have dragged the review panel's left
-                edge off the screen.
+                is 211px wide to the right of its own centre while the
+                viewport gives it only half its width, so the card ran off the
+                edge as the yaw scrubbed. That 211 is what sets the number,
+                and it is unforgiving: the corner clears a 375px screen at
+                0.888 with ZERO breathing room, and 0.95 — which looks like a
+                gentler instrument — still leaves it 13px off the screen. For
+                the ~12px gap the rest of this file is built to, the ceiling
+                is 0.832 at 375px and 0.796 at 360px, the narrowest mainstream
+                phone. 0.8 is that number, not a round one picked by eye.
+
+                Scaling about the centre is also the cheaper instrument, which
+                is not obvious: shifting the object left instead costs 2px of
+                review-panel width per 1px of clearance (the padding comes
+                straight off the panel) against 1.55px for the scale, and it
+                decentres the panel as well. Nothing here can move the stand
+                without moving the panel — tap-demo.tsx centres them in the
+                same column — so a centred, slightly smaller demo is the best
+                available trade. Cost: the panel's 14px body copy resolves at
+                11.2px on a phone.
 
                 shrink-0 is load-bearing, not decoration: this is a flex item,
                 and once the margin above turns positive the track it sits in
                 is narrower than 22rem, so without it the box quietly shrinks
                 to the track and takes the stand's centring and the review
                 panel's width down with it. */}
-            <div className="w-full shrink-0 scale-[0.8] min-[480px]:scale-100 lg:w-[22rem] lg:origin-left lg:scale-[0.88]">
+            <div className="w-full shrink-0 scale-[0.8] min-[480px]:scale-100 lg:w-[22rem] min-[1024px]:origin-left min-[1024px]:scale-[0.88] min-[1380px]:scale-100">
               <TapDemo scrollProgress={scrollYProgress} />
             </div>
           </motion.div>
