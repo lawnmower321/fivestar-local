@@ -112,28 +112,70 @@ export function Hero() {
 
           {/* The object, allowed to break the frame.
               Right-aligned in its track rather than centred in it, because the
-              scene is a good deal wider than the panel: the loose NFC card
-              lies on the table roughly 255px right of the panel's centre and
-              the ripple field reaches 230px. Right-alignment alone therefore
-              already walks the table past the container's edge; the negative
-              margin then carries the whole scene out into the page gutter.
-              That margin is derived FROM the gutter — half of (100vw − 72rem),
-              less the 79px the scene already overhangs and a 24px breathing
-              gap — so the loose card's far corner lands just inside the
-              viewport at every width instead of being guillotined by this
-              section's overflow-hidden. Clamped at −9rem so an ultra-wide
-              display doesn't strand the object out in the margin. */}
+              scene is a good deal wider than the panel: measured off the live
+              render, the loose NFC card's far corner sits 84px past this
+              wrapper's own right edge at rest — and 119px past it at the far
+              end of the yaw, because the stand keeps turning for the whole of
+              the hero's scroll span. Every number below is derived from the
+              119, not the 84: the resting pose is NOT the worst case, and
+              treating it as one is what let the card get guillotined by this
+              section's overflow-hidden across most laptop widths.
+
+              The margin is derived FROM the gutter — half of (100vw − 72rem),
+              less that overhang and a ~12px breathing gap — and is clamped at
+              BOTH ends. max() clamped only the negative end, and the inner
+              value crosses zero just above the xl breakpoint, where it then
+              evaluated POSITIVE and nudged the object inward: the exact
+              opposite of the intent. clamp() closes that off — −9rem so an
+              ultra-wide display doesn't strand the object out in the margin,
+              0px so the derived value can never become a positive inward push.
+
+              Below xl the gutter has run out (at 1024 the container IS the
+              viewport, with 24px of padding and nothing beyond it), so that
+              band gets the same expression with a deliberately POSITIVE
+              ceiling: +52px, the measured distance the object has to come in
+              for the card's corner to clear the screen edge there. It still
+              crosses the container's own content edge by ~12px, so the bleed
+              survives — token, as it must be when there is no gutter to bleed
+              into. */}
           <motion.div
             {...fade(0.15)}
-            className="relative flex justify-center lg:justify-end lg:pt-6 xl:mr-[max(-9rem,calc(655px_-_50vw))]"
+            className="relative flex justify-center lg:mr-[clamp(0px,634px_-_50vw,52px)] lg:justify-end lg:pt-6 xl:mr-[clamp(-9rem,634px_-_50vw,0px)]"
           >
             {/* Fixed to the review panel's own width from lg up, so opening
                 the panel cannot re-centre the stand underneath it. Full width
                 below that: the scene is wider than the panel (the loose card
                 on the table runs to ~148% of --stand-w), and at 390px a
                 352px box is wider than the column, which pushed that card's
-                far corner a few pixels off the screen. */}
-            <div className="w-full lg:w-[22rem]">
+                far corner a few pixels off the screen.
+
+                The two scales are the only lever that shortens the overhang
+                itself, and a uniform scale is the one lever that cannot
+                disturb the counter stand's locked geometry: --stand-w and
+                every proportion derived from it are untouched, the whole
+                projected scene is simply resolved smaller. Margin alone
+                could not do this job — at 1024 the object would have had to
+                come in ~107px, which walks the panel underneath the headline.
+
+                lg 0.88, origin left: the left edge is where the object meets
+                the copy, so anchoring there keeps the panel off the headline
+                (35px of clearance at 1024) while pulling the far corner in by
+                56px — the amount the 1024–1380 band is short.
+
+                base 0.8, origin centre (the default): below 480px the scene
+                is ~211px wide to the right of its own centre and the viewport
+                gives it only half its width, so the card ran off the edge as
+                the yaw scrubbed. Scaling about the centre is what keeps the
+                demo — stand, hint and review panel alike — centred; shifting
+                it left instead would have dragged the review panel's left
+                edge off the screen.
+
+                shrink-0 is load-bearing, not decoration: this is a flex item,
+                and once the margin above turns positive the track it sits in
+                is narrower than 22rem, so without it the box quietly shrinks
+                to the track and takes the stand's centring and the review
+                panel's width down with it. */}
+            <div className="w-full shrink-0 scale-[0.8] min-[480px]:scale-100 lg:w-[22rem] lg:origin-left lg:scale-[0.88]">
               <TapDemo scrollProgress={scrollYProgress} />
             </div>
           </motion.div>
