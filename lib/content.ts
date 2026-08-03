@@ -113,8 +113,18 @@ export const content = {
     cta: "See pricing",
     search: {
       query: "bakery near me",
+      // `from` values are where the scrub starts; the plain rating/reviews
+      // are where it lands. Only the tracked business animates.
       results: [
-        { name: "Bella's Bakery", rating: "4.9", reviews: 212, meta: "Bakery · Open now", top: true },
+        {
+          name: "Bella's Bakery",
+          rating: "4.9",
+          reviews: 212,
+          fromRating: 3.9,
+          fromReviews: 18,
+          meta: "Bakery · Open now",
+          top: true,
+        },
         { name: "Corner Bakehouse", rating: "4.1", reviews: 37, meta: "Bakery · Closes 5 PM", top: false },
         { name: "Daily Loaf Co.", rating: "3.9", reviews: 18, meta: "Bakery · Closes 4 PM", top: false },
       ],
