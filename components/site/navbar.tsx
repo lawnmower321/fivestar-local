@@ -52,7 +52,7 @@ export function Navbar() {
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link
           href="#"
-          className={`flex items-center gap-2 font-heading font-bold transition-colors ${
+          className={`flex items-center gap-2 font-heading font-bold transition-colors duration-300 ${
             solid ? "text-ink" : "text-white"
           }`}
         >
@@ -66,7 +66,7 @@ export function Navbar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`text-sm font-medium transition-colors ${
+              className={`text-sm font-medium transition-colors duration-300 ${
                 solid
                   ? "text-body hover:text-brand"
                   : "text-white/70 hover:text-white"
@@ -84,15 +84,15 @@ export function Navbar() {
             nativeButton={false}
             className={
               solid
-                ? "bg-brand text-white transition-colors hover:bg-brand/90"
-                : "bg-star font-semibold text-ink transition-colors hover:bg-star/90"
+                ? "bg-brand text-white transition-colors duration-300 hover:bg-brand/90"
+                : "bg-star font-semibold text-ink transition-colors duration-300 hover:bg-star/90"
             }
           >
             See pricing
           </Button>
         </div>
         <button
-          className={`transition-colors md:hidden ${solid ? "text-ink" : "text-white"}`}
+          className={`transition-colors duration-300 md:hidden ${solid ? "text-ink" : "text-white"}`}
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >
