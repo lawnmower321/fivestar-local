@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { IntakeForm } from "@/components/site/intake-form";
 import { Reveal } from "@/components/site/reveal";
 import { Section } from "@/components/site/section";
 import { content } from "@/lib/content";
@@ -22,17 +22,16 @@ export function FinalCta() {
           {content.finalCta.title}
         </h2>
         <p className="mt-4 text-[1.0625rem] leading-[1.7] text-white/80">{content.finalCta.body}</p>
-        {/* CTA is Honey here: on a Cobalt ground a Cobalt button would vanish.
-            This is the "one CTA" the brand kit allots to Honey. */}
-        <Button
-          render={<a href={`mailto:${content.site.email}?subject=${encodeURIComponent("Set up my business")}`} />}
-          nativeButton={false}
-          size="lg"
-          className="mt-8 bg-star font-semibold text-ink hover:bg-star/90"
-        >
-          {content.finalCta.cta}
-        </Button>
-        <p className="mt-4 font-mono text-xs tracking-wide text-white/60">{content.site.email}</p>
+        {/* The submit button is Honey: on a Cobalt ground a Cobalt button would
+            vanish. This is the "one CTA" the brand kit allots to Honey. */}
+        <div className="mt-10">
+          <IntakeForm />
+        </div>
+        {/* The direct email stays as a fallback: if the DB write path breaks, a
+            prospect still has a way to reach us. */}
+        <p className="mt-6 font-mono text-xs tracking-wide text-white/60">
+          Or email us directly — {content.site.email}
+        </p>
       </Reveal>
     </Section>
   );

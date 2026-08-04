@@ -224,4 +224,17 @@ export const content = {
     body: "Email us your business name. We'll find you on Google, program a card to your review page, and bring it to you.",
     cta: "Email us",
   },
+  intake: {
+    title: "Tell us your business name",
+    body: "We'll find you on Google, program a card to your review page, and bring it to you.",
+    businessLabel: "Business name",
+    businessPlaceholder: "Bella's Bakery",
+    emailLabel: "Email",
+    emailPlaceholder: "you@yourbusiness.com",
+    noteLabel: "Anything we should know? (optional)",
+    notePlaceholder: "Best time to stop by, what you sell, anything else.",
+    submit: "Find me on Google",
+    submitting: "Sending…",
+    success: "Got it — we'll email you within a day.",
+  },
 } as const;
