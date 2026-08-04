@@ -200,6 +200,48 @@ Google hexes. Optional: Higgsfield-generated imagery, team photos section.
 **Done when:** grep shows Google hexes only in the three simulation
 components; build clean; site visually consistent with the printed card.
 
+## Landing Phase 1 — Brand alignment & scroll moments ⏳ AWAITING GATE (2026-08-04)
+
+Branch `design/landing-brand-alignment`. Plan:
+`docs/superpowers/plans/2026-08-02-landing-phase1.md` (10 tasks, all executed).
+**Not merged to master** — the plan ends at a review gate, by design.
+
+Shipped:
+- `lib/brand.ts` + `@theme` tokens + a `<Section>` wrapper that owns ground
+  colour and vertical rhythm, so no section hard-codes `bg-*`/`py-*`.
+- Four-ground ladder across nine sections: Ink, Paper, Mist, Paper, Ink,
+  Mist, Paper, Mist, Cobalt (verified in the browser).
+- `CounterStand` — a CSS-3D counter stand seated on a table plane, replacing
+  the fictional credit card. `nfc-card.tsx` deleted.
+- Hero rebuilt: offset composition on Ink, quick-link strip closing the old
+  ~250px dead zone, corner brackets.
+- Moment 1 (`review-showcase`): scroll-scrubbed ranking climb with a clamped
+  `Odometer`. Moment 2 (`scan-showcase`): the six-business carousel keeps its
+  concept but swaps its `setInterval` driver for a CSS-sticky scroll runway;
+  timer remains the fallback on mobile and under reduced motion.
+- Footer rebuilt (three columns; phone/location/social render only when
+  non-null — no invented details) and a no-contracts guarantee badge that
+  makes no refund promise.
+- Intake form replacing the `mailto:` CTA: `leads` table, zod schema with
+  every string bounded, honeypot answered with the success shape, direct
+  email retained as a fallback path.
+
+Verification: 172 tests, build and lint clean, no Google trademark hex or
+stale slate chrome outside the three Google-UI mock components, zero WCAG AA
+failures on the Ink and Cobalt grounds, no horizontal scroll at 1440 or 390.
+
+**Outstanding — the gate decision:**
+1. Does opening on Ink read as premium, or heavy for an SMB buyer?
+2. Does the stand read as a real object, or as flat cardboard?
+3. Is the page still fast, against the 1.52s deployed baseline?
+Plus two flagged decisions: the warmed Paper value (`#fcfbf9`) and
+Honey-on-Cobalt for the final CTA button.
+
+**Outstanding — blocking the intake form:** migration
+`supabase/migrations/0007_leads.sql` is written but **not yet applied** to the
+live project. Until it is, the form validates correctly and then shows its
+"email us instead" fallback error rather than writing a row.
+
 ## Parked launch backlog (blocked on materials/externals, not code)
 
 - Stripe payment links → `pricing.tiers[].href` (currently mailto fallback).
