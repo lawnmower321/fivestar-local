@@ -30,7 +30,10 @@ export function Pricing() {
                 className={
                   // each tier is styled like the card itself — the thing you're buying
                   dark
-                    ? "relative flex flex-col rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8 shadow-2xl shadow-slate-900/30"
+                    // Ink, not the retired fictional card's slate gradient —
+                    // this is FiveStar's own chrome and belongs to the brand's
+                    // dark ground (Task 10 trademark/chrome grep).
+                    ? "relative flex flex-col rounded-3xl bg-gradient-to-br from-ink to-[#1a2c5c] p-8 shadow-2xl shadow-ink/30"
                     : "relative flex flex-col rounded-3xl border border-hairline bg-white p-8 shadow-sm"
                 }
               >
