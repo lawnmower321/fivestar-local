@@ -12,6 +12,9 @@
 //    bios (who you are, why you started this, that you install in person).
 //    Expand the `team` block below into { title, body, members: [{ name,
 //    role, photo, bio }] } once headshots exist.
+// 6. Footer details: set site.location, site.phone, and site.social when you
+//    want them public. Each renders only when non-null — leave them null
+//    rather than guessing.
 
 export const content = {
   site: {
@@ -19,6 +22,11 @@ export const content = {
     email: "hello@fivestarlocal.pro",
     // Your real Google review link (e.g. https://g.page/r/XXXX/review). null hides it.
     reviewUrl: null as string | null,
+    // Footer details. Each renders only when filled — leave null rather than
+    // guessing, an unfilled field is invisible but a wrong one is a lie.
+    location: null as string | null, // e.g. "Based in Norwalk, CT"
+    phone: null as string | null,    // e.g. "(203) 555-0134"
+    social: [] as { label: string; href: string }[],
   },
   nav: [
     { label: "How it works", href: "#how-it-works" },
@@ -169,6 +177,12 @@ export const content = {
       },
     ],
     finePrint: "Setup happens at your business — we come to you.",
+    // States only what the tiers already promise — no refund language, which
+    // has not been agreed to and would be an enforceable commitment.
+    guarantee: {
+      title: "No contracts, ever",
+      body: "If it isn't bringing you reviews, walk away — and keep the cards.",
+    },
   },
   // TODO #5 above: grow this into the full "Meet the team" section with photos
   team: {

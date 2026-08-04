@@ -1,4 +1,4 @@
-import { Check, Nfc, Star } from "lucide-react";
+import { Check, Nfc, ShieldCheck, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/site/reveal";
 import { Section } from "@/components/site/section";
@@ -84,6 +84,14 @@ export function Pricing() {
               </Reveal>
             );
           })}
+        </div>
+
+        <div className="mx-auto mt-12 flex max-w-xl items-center gap-4 rounded-2xl border border-star/30 bg-star/10 px-6 py-5">
+          <ShieldCheck size={28} className="shrink-0 text-star" />
+          <div>
+            <p className="font-heading font-bold text-ink">{content.pricing.guarantee.title}</p>
+            <p className="mt-1 text-sm leading-relaxed text-body">{content.pricing.guarantee.body}</p>
+          </div>
         </div>
 
         <p className="mt-8 text-center font-mono text-xs uppercase tracking-[0.2em] text-body/70">
